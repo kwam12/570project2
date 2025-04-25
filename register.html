@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Nour</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Reuse login styles - can be moved to style.css later */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .login-container h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .login-btn { /* Keep class name for button styling */
+            width: 100%;
+            padding: 12px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .login-btn:hover {
+            background-color: #555;
+        }
+        .message {
+            margin-top: 15px;
+            text-align: center;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .message.error {
+            color: #D8000C;
+            background-color: #FFD2D2;
+        }
+        .message.success {
+             color: #4F8A10;
+             background-color: #DFF2BF;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <div class="login-container"> <!-- Reuse container style -->
+        <h1>Register</h1>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <!-- Add confirm password field if needed -->
+            <button type="submit" class="login-btn">Register</button> <!-- Reuse button style -->
+            <div id="message-area" class="message" style="display: none;"></div>
+        </form>
+        <p style="text-align: center; margin-top: 20px;">
+            Already have an account? <a href="/login.html">Login here</a>
+        </p>
+         <p class="disclaimer-text">
+            By creating or entering an account, you agree to the <a href="/terms.html">Terms of Service</a> and <a href="/privacy.html">Privacy Policy</a>.
+        </p>
+    </div>
+
+    <!-- Link the main JavaScript file -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const registerForm = document.getElementById('register-form');
+            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const messageArea = document.getElementById('message-area');
+
+            registerForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); 
+                messageArea.style.display = 'none';
+                messageArea.textContent = '';
+                messageArea.className = 'message';
+
+                const username = usernameInput.value;
+                const email = emailInput.value;
+                const password = passwordInput.value;
+
+                // Add basic password validation if desired (e.g., length)
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/auth/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, email, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || `HTTP error! status: ${response.status}`); 
+                    }
+
+                    console.log('Registration successful', data);
+                    
+                    // Auto-login: Store token if received
+                    if (data.token) {
+                        localStorage.setItem('authToken', data.token);
+                        console.log('Token stored in localStorage on registration');
+                        messageArea.textContent = 'Registration successful! Logging you in...';
+                        messageArea.classList.add('success');
+                        messageArea.style.display = 'block';
+                        // Redirect to homepage after delay
+                        setTimeout(() => {
+                            window.location.href = '/'; 
+                        }, 1500);
+                    } else {
+                         // Handle case where registration succeeded but token failed (optional)
+                        messageArea.textContent = data.message || 'Registration successful! Please login.';
+                        messageArea.classList.add('success'); // Still success, just no auto-login
+                        messageArea.style.display = 'block';
+                    }
+
+                } catch (error) {
+                    console.error('Registration failed:', error);
+                    messageArea.textContent = error.message || 'Registration failed. Please try again.';
+                    messageArea.classList.add('error');
+                    messageArea.style.display = 'block';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html> 

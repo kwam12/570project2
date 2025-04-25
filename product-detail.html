@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Nour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for Product Detail Page */
+        .pdp-main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive columns */
+            gap: 40px;
+            padding: 40px 20px;
+            background-color: #fff;
+            max-width: 1200px; /* Limit max width */
+            margin: 0 auto; /* Center the layout */
+        }
+
+        .pdp-image-column img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            /* Add border or subtle shadow if desired */
+            /* border: 1px solid #eee; */
+        }
+
+        .pdp-details-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Spacing between detail items */
+        }
+
+        .pdp-breadcrumbs {
+            font-size: 0.8em;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        
+        .pdp-brand {
+            font-size: 0.9em;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        .pdp-name {
+            font-size: 1.8em; /* Larger product name */
+            font-weight: normal;
+            margin-bottom: 5px;
+        }
+
+        .pdp-price {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex; /* For original price alignment */
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .pdp-price .original-price { /* Reuse existing class */
+             font-size: 0.9em; /* Slightly smaller */
+        }
+
+        .pdp-payment-options {
+            font-size: 0.85em;
+            color: #555;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            margin-bottom: 10px;
+        }
+        .pdp-payment-options span {
+             display: block;
+             margin-bottom: 5px;
+        }
+        .pdp-payment-options a {
+            text-decoration: underline;
+        }
+        .pdp-payment-options img { /* For logos like Klarna/Affirm */
+            height: 1em;
+            vertical-align: middle;
+            margin: 0 3px;
+        }
+
+        .pdp-color-selector, .pdp-size-selector, .pdp-quantity-selector {
+            margin-bottom: 10px;
+        }
+
+        .pdp-selector-label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            display: block;
+            color: #333;
+        }
+        .pdp-color-selector .color-swatches {
+            display: flex;
+            gap: 10px;
+        }
+        .pdp-color-selector .color-swatch { /* Reuse existing class */
+            width: 30px; /* Larger swatches */
+            height: 30px;
+            border: 2px solid transparent; /* Border for selected state */
+            transition: border-color 0.2s ease;
+        }
+         .pdp-color-selector .color-swatch.selected {
+            border-color: #333; /* Dark border when selected */
+         }
+         .pdp-color-selector .color-swatch[style*="#FFFFFF"] { /* White swatch border */
+             border: 1px solid #ccc;
+         }
+          .pdp-color-selector .color-swatch[style*="#FFFFFF"].selected {
+             border: 2px solid #333;
+         }
+        .pdp-selected-color-name {
+            font-size: 0.85em;
+            color: #555;
+            margin-left: 5px; /* Space after label */
+        }
+
+        .pdp-size-selector select, .pdp-quantity-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            appearance: none; /* Basic style reset */
+            background-color: #fff;
+             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Basic dropdown arrow */
+             background-repeat: no-repeat;
+             background-position: right 10px center;
+             background-size: 0.65em auto;
+        }
+
+        .pdp-size-guide {
+            font-size: 0.85em;
+            text-decoration: underline;
+            color: #555;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .pdp-delivery-info {
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        .pdp-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pdp-add-to-bag-btn {
+            flex-grow: 1; /* Takes up most space */
+            padding: 15px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.2s ease;
+        }
+        .pdp-add-to-bag-btn:hover {
+            background-color: #333;
+        }
+        .pdp-add-to-bag-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pdp-wishlist-btn { /* Style the wishlist button */
+            padding: 15px;
+            background-color: #fff;
+            border: 1px solid #000;
+            border-radius: 4px;
+            font-size: 1.2em; /* Adjust size as needed */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px; /* Fixed width */
+            color: #000; /* Default black outline */
+        }
+         .pdp-wishlist-btn.active {
+            color: #ff0000; /* Red when active */
+            border-color: #ff0000; /* Red border when active */
+         }
+        /* Ensure Font Awesome icon inherits color */
+        .pdp-wishlist-btn i { 
+            line-height: 1; 
+        }
+         .pdp-wishlist-btn.active i::before { /* Ensure active state uses solid heart */
+            font-family: "Font Awesome 6 Free"; 
+            font-weight: 900; 
+            content: "\f004";
+         }
+
+        /* Styles for Recommendations Section */
+        .pdp-recommendations {
+            position: relative; /* Context for arrow positioning */
+        }
+        .pdp-recommendations h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: normal;
+            font-size: 1.5em;
+        }
+        
+        .recommendations-grid {
+            display: flex; /* Change from grid to flex for horizontal scroll */
+            overflow-x: auto; /* Enable horizontal scrolling */
+            gap: 20px; /* Keep gap between cards */
+            padding-bottom: 15px; /* Space for scrollbar if visible / prevent cutting off shadows */
+            scroll-behavior: smooth; /* Smooth scrolling on click */
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none;  /* Hide scrollbar for IE/Edge */
+        }
+        .recommendations-grid::-webkit-scrollbar { 
+             display: none; /* Hide scrollbar for Chrome/Safari/Opera */
+        }
+
+        /* Ensure product cards don't shrink and have a base width */
+        .recommendations-grid .product-card {
+            flex: 0 0 auto; /* Don't grow, don't shrink, use base width */
+            width: 250px; /* Match the minmax width from original grid, adjust if needed */
+             /* Add specific overrides for recommendation cards if needed */
+        }
+
+        /* Styles for Scroll Arrows */
+        .scroll-arrow {
+            position: absolute;
+            top: 50%; /* Position vertically centered */
+            transform: translateY(-50%); /* Adjust vertical centering */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, opacity 0.2s ease;
+            opacity: 0; /* Hidden by default, shown by JS */
+            pointer-events: none; /* Disabled by default */
+        }
+        .scroll-arrow:hover {
+             background-color: rgba(255, 255, 255, 1);
+        }
+        .scroll-arrow.visible {
+             opacity: 1;
+             pointer-events: auto;
+        }
+        .scroll-arrow-left {
+             left: 0px; /* Position left arrow */
+        }
+        .scroll-arrow-right {
+             right: 0px; /* Position right arrow */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <main class="pdp-main">
+        <div class="pdp-image-column">
+            <img id="pdp-product-image" src="/assets/placeholder.png" alt="Product Image">
+        </div>
+
+        <div class="pdp-details-column">
+            <div class="pdp-breadcrumbs" id="pdp-breadcrumbs">Category / Subcategory</div>
+            <div class="pdp-brand" id="pdp-brand">Brand</div>
+            <h1 class="pdp-name" id="pdp-name">Product Name Loading...</h1>
+            <div class="pdp-price" id="pdp-price">$0.00</div>
+
+            <div class="pdp-color-selector">
+                <label class="pdp-selector-label">Color: <span class="pdp-selected-color-name" id="pdp-selected-color-name"></span></label>
+                <div class="color-swatches" id="pdp-color-swatches">
+                    <p>Loading colors...</p>
+                </div>
+            </div>
+
+            <div class="pdp-size-selector">
+                <label for="pdp-size-select" class="pdp-selector-label">Size</label>
+                <select id="pdp-size-select" name="size">
+                    <option value="">Select Size</option>
+                </select>
+            </div>
+
+            <div class="pdp-delivery-info">
+                <strong>DELIVERY & PICKUP</strong>
+                <p>Select size/color to view delivery and pickup options.</p>
+            </div>
+
+            <div class="pdp-quantity-selector">
+                <label for="pdp-quantity-select" class="pdp-selector-label">QTY</label>
+                <select id="pdp-quantity-select" name="quantity">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+
+            <div class="pdp-actions">
+                <button class="pdp-add-to-bag-btn" id="pdp-add-to-bag-btn" disabled>SELECT SIZE</button>
+                <button class="pdp-wishlist-btn" id="pdp-wishlist-btn" title="Add to Wishlist">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Feedback Section -->
+    <section class="pdp-feedback-section">
+        <h2>Leave Feedback</h2>
+        <form id="feedback-form">
+             <input type="hidden" id="feedback-product-id" name="productId"> <!-- Hidden field for product ID -->
+            <div class="feedback-rating">
+                <label>Rating:</label>
+                <!-- Simple star rating (improve with JS later if needed) -->
+                <input type="radio" id="star5" name="rating" value="5"><label for="star5">☆</label>
+                <input type="radio" id="star4" name="rating" value="4"><label for="star4">☆</label>
+                <input type="radio" id="star3" name="rating" value="3"><label for="star3">☆</label>
+                <input type="radio" id="star2" name="rating" value="2"><label for="star2">☆</label>
+                <input type="radio" id="star1" name="rating" value="1"><label for="star1">☆</label>
+            </div>
+            <div class="feedback-comment">
+                <label for="feedback-comment-text">Comment:</label>
+                <textarea id="feedback-comment-text" name="comment" rows="4" required></textarea>
+            </div>
+            <button type="submit" id="submit-feedback-btn">Submit Feedback</button>
+            <p id="feedback-message" class="feedback-status-message" style="display: none;"></p>
+        </form>
+    </section>
+    <!-- End Feedback Section -->
+
+    <!-- Recommendations Section -->
+    <section class="pdp-recommendations">
+        <h2>You Might Also Like</h2>
+        <button class="scroll-arrow scroll-arrow-left" id="rec-scroll-left" aria-label="Scroll Left">&#x276E;</button>
+        <div class="product-grid recommendations-grid" id="pdp-recommendations-grid">
+            <!-- Recommended products loaded here -->
+            <p>Loading recommendations...</p>
+        </div>
+        <button class="scroll-arrow scroll-arrow-right" id="rec-scroll-right" aria-label="Scroll Right">&#x276F;</button>
+    </section>
+    <!-- End Recommendations Section -->
+
+    <div id="footer-placeholder"></div>
+
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const productImage = document.getElementById('pdp-product-image');
+            const breadcrumbs = document.getElementById('pdp-breadcrumbs');
+            const brand = document.getElementById('pdp-brand');
+            const name = document.getElementById('pdp-name');
+            const price = document.getElementById('pdp-price');
+            const selectedColorName = document.getElementById('pdp-selected-color-name');
+            const colorSwatchesContainer = document.getElementById('pdp-color-swatches');
+            const sizeSelect = document.getElementById('pdp-size-select');
+            const quantitySelect = document.getElementById('pdp-quantity-select');
+            const addToBagBtn = document.getElementById('pdp-add-to-bag-btn');
+            const wishlistBtn = document.getElementById('pdp-wishlist-btn');
+            const wishlistIcon = wishlistBtn.querySelector('i');
+            const recommendationsGrid = document.getElementById('pdp-recommendations-grid'); // Get recommendations grid
+            const scrollLeftBtn = document.getElementById('rec-scroll-left'); // Get scroll buttons
+            const scrollRightBtn = document.getElementById('rec-scroll-right');
+            const feedbackForm = document.getElementById('feedback-form'); // Get feedback form
+            const feedbackProductIdInput = document.getElementById('feedback-product-id'); // Hidden product ID input
+            const submitFeedbackBtn = document.getElementById('submit-feedback-btn'); // Submit button
+            const feedbackMessageP = document.getElementById('feedback-message'); // Status message paragraph
+
+            let currentProduct = null;
+            let selectedSize = null;
+            let selectedColor = null;
+            let userWishlist = new Set();
+            const authToken = localStorage.getItem('authToken');
+
+            function updateAddToBagButton() {
+                if (selectedSize && selectedColor) {
+                    addToBagBtn.disabled = false;
+                    addToBagBtn.textContent = 'ADD TO BAG';
+                } else if (!selectedSize && !selectedColor && currentProduct && currentProduct.sizes.length === 0 && currentProduct.colors.length === 0) {
+                     addToBagBtn.disabled = false;
+                     addToBagBtn.textContent = 'ADD TO BAG';
+                } else if (!selectedSize && currentProduct && currentProduct.sizes.length > 0) {
+                    addToBagBtn.disabled = true;
+                    addToBagBtn.textContent = 'SELECT SIZE';
+                } else if (!selectedColor && currentProduct && currentProduct.colors.length > 0) {
+                    addToBagBtn.disabled = true;
+                    addToBagBtn.textContent = 'SELECT COLOR';
+                 } else {
+                    addToBagBtn.disabled = true;
+                     addToBagBtn.textContent = 'SELECT SIZE/COLOR';
+                 }
+            }
+            
+            async function fetchWishlist() {
+                if (!authToken) return; 
+                try {
+                    const response = await fetch('http://localhost:3001/api/users/me/wishlist', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    if (!response.ok) {
+                        if (response.status !== 401) throw new Error(`HTTP error! status: ${response.status}`);
+                        return; 
+                    }
+                    const wishlistIds = await response.json();
+                    userWishlist = new Set(wishlistIds); 
+                } catch (error) { console.error('Failed to fetch wishlist:', error); }
+            }
+            
+             function updateWishlistButtonState(productId) {
+                if (userWishlist.has(productId)) {
+                    wishlistBtn.classList.add('active');
+                    wishlistIcon.classList.remove('far');
+                    wishlistIcon.classList.add('fas');
+                } else {
+                    wishlistBtn.classList.remove('active');
+                    wishlistIcon.classList.remove('fas');
+                    wishlistIcon.classList.add('far');
+                }
+            }
+
+            // --- Function to Create Product Card (for recommendations) ---
+            // Note: Ideally, move this to a shared utils.js file later
+            function createRecommendationCard(product) {
+                 const productCard = document.createElement('div');
+                 productCard.className = 'product-card'; // Reuse product card styles
+                 
+                 const productId = product._id;
+                 let isLiked = userWishlist.has(productId); // Check if liked
+                 
+                 let priceHTML = `$${product.price.toFixed(2)}`;
+                 if (product.originalPrice && product.originalPrice > product.price) {
+                     priceHTML = `<span class="original-price">$${product.originalPrice.toFixed(2)}</span> ${priceHTML}`;
+                 }
+                 
+                 let tagsHTML = '';
+                 if (product.isNew) tagsHTML += '<span class="product-tag new">New</span>';
+                 if (product.isBestSeller) tagsHTML += '<span class="product-tag best-seller">Best seller</span>';
+                 if (product.matchingSet) tagsHTML += '<span class="product-tag matching-set">Matching set</span>';
+
+                 // --- Star Rating Display --- 
+                 let ratingHTML = '<div class="product-rating-placeholder"></div>';
+                 if (product.averageRating && product.numReviews > 0) {
+                      const rating = Math.round(product.averageRating * 2) / 2;
+                      let stars = '';
+                      for (let i = 1; i <= 5; i++) {
+                          if (i <= rating) stars += '<i class="fas fa-star"></i>';
+                          else if (i - 0.5 === rating) stars += '<i class="fas fa-star-half-alt"></i>';
+                          else stars += '<i class="far fa-star"></i>';
+                      }
+                     ratingHTML = `<div class="product-rating">${stars} (${product.numReviews})</div>`;
+                 }
+                 // --- End Star Rating --- 
+
+                 productCard.innerHTML = `
+                     <button class="wishlist-btn ${isLiked ? 'active' : ''}" data-product-id="${productId}"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i></button>
+                     <a href="/product-detail.html?id=${productId}" class="product-card-link">
+                         <div class="product-image-container">
+                             <img src="${product.image || '/assets/placeholder.png'}" alt="${product.name}">
+                             ${tagsHTML}
+                         </div>
+                         ${ratingHTML}
+                         <div class="product-colors">
+                             ${product.colors && product.colors.length > 0 ? 
+                                 product.colors.map(color => 
+                                     `<span class="color-swatch" style="background-color: ${color}; ${color.toUpperCase() === '#FFFFFF' ? 'border: 1px solid #ccc;' : ''}"></span>`
+                                 ).join('') 
+                                 : ''
+                             }
+                         </div>
+                         <p class="product-name">${product.name}</p>
+                         <p class="product-price">${priceHTML}</p>
+                     </a>
+                 `;
+                 
+                 // Add wishlist click handler to recommended item button
+                const recWishlistBtn = productCard.querySelector('.wishlist-btn');
+                recWishlistBtn.addEventListener('click', async () => {
+                    // Use the same logic as the main product wishlist button
+                    if (!authToken) { alert("Please log in."); window.location.href = '/login.html'; return; }
+                    const recProductId = recWishlistBtn.dataset.productId;
+                    const recIsActive = recWishlistBtn.classList.contains('active');
+                    let method, url;
+                    if (recIsActive) { method = 'DELETE'; url = `http://localhost:3001/api/users/me/wishlist/${recProductId}`; }
+                    else { method = 'POST'; url = 'http://localhost:3001/api/users/me/wishlist'; }
+                    
+                    try {
+                         const fetchOptions = { method: method, headers: { 'Authorization': `Bearer ${authToken}` } };
+                         if (method === 'POST') { fetchOptions.headers['Content-Type'] = 'application/json'; fetchOptions.body = JSON.stringify({ productId: recProductId }); }
+                         const response = await fetch(url, fetchOptions);
+                         if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || `HTTP error! status: ${response.status}`); }
+                         
+                         // Update UI and local state
+                         const recIcon = recWishlistBtn.querySelector('i');
+                         recWishlistBtn.classList.toggle('active');
+                         if (recIsActive) { userWishlist.delete(recProductId); recIcon.classList.remove('fas'); recIcon.classList.add('far'); }
+                         else { userWishlist.add(recProductId); recIcon.classList.remove('far'); recIcon.classList.add('fas'); }
+                         
+                         // Update main button if it's the same product (edge case)
+                         if (currentProduct && currentProduct._id === recProductId) { updateWishlistButtonState(recProductId); } 
+                         
+                     } catch (error) { console.error('Rec Wishlist update failed:', error); alert(`Failed: ${error.message}`); }
+                 });
+
+                 return productCard;
+             }
+
+             // --- Fetch Recommendations ---
+             async function loadRecommendations(productIdToExclude, category) {
+                 if (!category) {
+                      recommendationsGrid.innerHTML = '<p>Could not determine category for recommendations.</p>';
+                     return;
+                 }
+                 try {
+                     const response = await fetch(`http://localhost:3001/api/products?category=${encodeURIComponent(category)}`);
+                     if (!response.ok) {
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                     }
+                     const data = await response.json();
+                     let recommendedProducts = data.products;
+
+                     // Filter out the current product and limit to 4 recommendations
+                     recommendedProducts = recommendedProducts
+                                         .filter(p => p._id !== productIdToExclude)
+                                         // .slice(0, 4); // Removed slice to show all
+
+                     recommendationsGrid.innerHTML = ''; // Clear loading message
+
+                     if (recommendedProducts.length === 0) {
+                         recommendationsGrid.innerHTML = '<p>No other products found in this category.</p>';
+                         return;
+                     }
+
+                     recommendedProducts.forEach(product => {
+                         recommendationsGrid.appendChild(createRecommendationCard(product));
+                     });
+
+                 } catch (error) {
+                     console.error('Failed to load recommendations:', error);
+                     recommendationsGrid.innerHTML = '<p>Could not load recommendations.</p>';
+                 }
+             }
+
+            async function loadProductDetails() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const productId = urlParams.get('id');
+
+                if (!productId) {
+                    name.textContent = "Product not found.";
+                    return;
+                }
+
+                try {
+                    await fetchWishlist();
+                    
+                    const response = await fetch(`http://localhost:3001/api/products/${productId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    currentProduct = await response.json();
+
+                    document.title = `${currentProduct.name} - Nour`;
+                    breadcrumbs.textContent = `${currentProduct.category || 'Uncategorized'}`; 
+                    brand.textContent = currentProduct.brand || 'Nour';
+                    name.textContent = currentProduct.name;
+                    
+                    let priceHTML = `$${currentProduct.price.toFixed(2)}`;
+                     if (currentProduct.originalPrice && currentProduct.originalPrice > currentProduct.price) {
+                         priceHTML = `<span class="original-price">$${currentProduct.originalPrice.toFixed(2)}</span> ${priceHTML}`;
+                     }
+                     price.innerHTML = priceHTML;
+
+                    productImage.src = currentProduct.image || '/assets/placeholder.png';
+                    productImage.alt = currentProduct.name;
+
+                    colorSwatchesContainer.innerHTML = '';
+                    if (currentProduct.colors && currentProduct.colors.length > 0) {
+                        currentProduct.colors.forEach(color => {
+                            const swatch = document.createElement('span');
+                            swatch.className = 'color-swatch';
+                            swatch.style.backgroundColor = color;
+                             swatch.dataset.color = color;
+                            swatch.title = color;
+                             if (color.toUpperCase() === '#FFFFFF') {
+                                 swatch.style.border = '1px solid #ccc';
+                             }
+                            swatch.addEventListener('click', () => {
+                                selectedColor = color;
+                                selectedColorName.textContent = color;
+                                colorSwatchesContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                                swatch.classList.add('selected');
+                                updateAddToBagButton();
+                            });
+                            colorSwatchesContainer.appendChild(swatch);
+                        });
+                    } else {
+                        selectedColorName.textContent = 'N/A';
+                        selectedColor = 'N/A';
+                    }
+
+
+                    sizeSelect.innerHTML = '<option value="">Select Size</option>';
+                    if (currentProduct.sizes && currentProduct.sizes.length > 0) {
+                        currentProduct.sizes.forEach(size => {
+                            const option = document.createElement('option');
+                            option.value = size;
+                            option.textContent = size;
+                            sizeSelect.appendChild(option);
+                        });
+                         sizeSelect.disabled = false;
+                    } else {
+                         sizeSelect.innerHTML = '<option value="N/A">N/A</option>';
+                         sizeSelect.disabled = true;
+                         selectedSize = 'N/A';
+                    }
+
+                    updateWishlistButtonState(currentProduct._id);
+                    
+                    updateAddToBagButton(); 
+                    
+                    // --- Load Recommendations --- 
+                    loadRecommendations(currentProduct._id, currentProduct.category).then(() => {
+                         // Check arrows again after recommendations are loaded and potentially cause overflow
+                         checkScrollArrows(); 
+                     });
+
+                    // --- Feedback Form Submission Handler ---
+                    if (feedbackForm) {
+                        feedbackForm.addEventListener('submit', async (event) => {
+                            event.preventDefault();
+                            submitFeedbackBtn.disabled = true;
+                            submitFeedbackBtn.textContent = 'Submitting...';
+                            feedbackMessageP.style.display = 'none';
+                            feedbackMessageP.className = 'feedback-status-message'; // Reset class
+
+                            const authToken = localStorage.getItem('authToken');
+                            if (!authToken) {
+                                feedbackMessageP.textContent = 'You must be logged in to submit feedback.';
+                                feedbackMessageP.className = 'feedback-status-message error';
+                                feedbackMessageP.style.display = 'block';
+                                submitFeedbackBtn.disabled = false;
+                                submitFeedbackBtn.textContent = 'Submit Feedback';
+                                // Optional: Redirect to login
+                                // setTimeout(() => { window.location.href = '/login.html'; }, 2000);
+                                return;
+                            }
+
+                            const formData = new FormData(feedbackForm);
+                            const feedbackData = {
+                                productId: formData.get('productId'),
+                                rating: formData.get('rating') ? parseInt(formData.get('rating'), 10) : null,
+                                comment: formData.get('comment')
+                            };
+
+                            try {
+                                const response = await fetch('http://localhost:3001/api/feedback', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${authToken}`
+                                    },
+                                    body: JSON.stringify(feedbackData)
+                                });
+
+                                const result = await response.json();
+
+                                if (!response.ok) {
+                                    throw new Error(result.message || `HTTP error! status: ${response.status}`);
+                                }
+
+                                feedbackMessageP.textContent = 'Feedback submitted successfully!';
+                                feedbackMessageP.className = 'feedback-status-message success';
+                                feedbackForm.reset(); // Clear the form
+
+                            } catch (error) {
+                                console.error('Feedback submission failed:', error);
+                                feedbackMessageP.textContent = `Error: ${error.message}`;
+                                feedbackMessageP.className = 'feedback-status-message error';
+                            } finally {
+                                feedbackMessageP.style.display = 'block';
+                                submitFeedbackBtn.disabled = false;
+                                submitFeedbackBtn.textContent = 'Submit Feedback';
+                            }
+                        });
+                    }
+                    
+                    // Add logic to set the hidden product ID field when product details load
+                    function updateFeedbackProductId(productId) {
+                        if (feedbackProductIdInput) {
+                            feedbackProductIdInput.value = productId;
+                        }
+                    }
+                    
+                    updateFeedbackProductId(currentProduct._id);
+
+                } catch (error) {
+                    console.error('Failed to load product details:', error);
+                    name.textContent = "Failed to load product.";
+                }
+            }
+
+            sizeSelect.addEventListener('change', (event) => {
+                selectedSize = event.target.value;
+                updateAddToBagButton();
+            });
+
+            addToBagBtn.addEventListener('click', () => {
+                if (!currentProduct || !selectedColor || !selectedSize) {
+                    alert("Please select color and size.");
+                    return;
+                }
+                const itemToAdd = {
+                    id: currentProduct._id,
+                    name: currentProduct.name,
+                    price: currentProduct.price,
+                    image: currentProduct.image,
+                    color: selectedColor,
+                    size: selectedSize,
+                    quantity: parseInt(quantitySelect.value, 10)
+                };
+                console.log("Adding to bag:", itemToAdd);
+                let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                const existingItemIndex = cart.findIndex(item => 
+                    item.id === itemToAdd.id && item.color === itemToAdd.color && item.size === itemToAdd.size
+                );
+
+                if (existingItemIndex > -1) {
+                     cart[existingItemIndex].quantity += itemToAdd.quantity;
+                } else {
+                     cart.push(itemToAdd);
+                }
+                localStorage.setItem('shoppingCart', JSON.stringify(cart));
+                // alert(`${itemToAdd.name} added to bag!`); // Removed alert
+                // Optional: Update cart icon count in header (requires header interaction logic)
+                document.dispatchEvent(new CustomEvent('cartUpdated')); // Dispatch event
+            });
+            
+            wishlistBtn.addEventListener('click', async () => {
+                if (!authToken) {
+                    window.location.href = '/register.html'; // Redirect to register
+                    return;
+                }
+                if (!currentProduct) return; 
+
+                const productId = currentProduct._id;
+                const isActive = wishlistBtn.classList.contains('active');
+                let method, url;
+                 if (isActive) { method = 'DELETE'; url = `http://localhost:3001/api/users/me/wishlist/${productId}`; } 
+                 else { method = 'POST'; url = 'http://localhost:3001/api/users/me/wishlist'; }
+
+                 try {
+                     const fetchOptions = { method: method, headers: { 'Authorization': `Bearer ${authToken}` } };
+                     if (method === 'POST') { fetchOptions.headers['Content-Type'] = 'application/json'; fetchOptions.body = JSON.stringify({ productId }); }
+                    
+                     const response = await fetch(url, fetchOptions);
+                     if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || `HTTP error! status: ${response.status}`); }
+                    
+                     if (isActive) { userWishlist.delete(productId); } else { userWishlist.add(productId); }
+                     updateWishlistButtonState(productId);
+                     
+                     if (!isActive) { 
+                         wishlistIcon.style.animation = 'none'; 
+                         void wishlistIcon.offsetWidth; 
+                         wishlistIcon.style.animation = 'heartJump 0.3s ease-in-out'; 
+                     }
+
+                 } catch (error) { console.error('Wishlist update failed:', error); alert(`Failed to update wishlist: ${error.message}`); }
+            });
+
+            // --- Scroll Arrow Logic ---
+            function checkScrollArrows() {
+                if (!recommendationsGrid) return;
+                const scrollAmount = recommendationsGrid.scrollLeft;
+                const maxScroll = recommendationsGrid.scrollWidth - recommendationsGrid.clientWidth;
+                
+                // Show/hide left arrow
+                if (scrollAmount > 10) { // Show if scrolled slightly right
+                    scrollLeftBtn.classList.add('visible');
+                } else {
+                    scrollLeftBtn.classList.remove('visible');
+                }
+
+                // Show/hide right arrow
+                if (scrollAmount < maxScroll - 10) { // Show if not fully scrolled right
+                    scrollRightBtn.classList.add('visible');
+                } else {
+                    scrollRightBtn.classList.remove('visible');
+                }
+            }
+
+            scrollLeftBtn.addEventListener('click', () => {
+                // Scroll left by approx one card width + gap
+                recommendationsGrid.scrollBy({ left: -270, behavior: 'smooth' }); 
+            });
+
+            scrollRightBtn.addEventListener('click', () => {
+                // Scroll right by approx one card width + gap
+                recommendationsGrid.scrollBy({ left: 270, behavior: 'smooth' });
+            });
+
+            // Check arrows visibility when scrolling
+            recommendationsGrid.addEventListener('scroll', checkScrollArrows);
+
+            // Initial check in case content doesn't overflow initially
+             // Use a small timeout to allow content to render first
+             setTimeout(checkScrollArrows, 500);
+             // Also check after recommendations are loaded
+
+            // --- Initial Load ---
+            loadProductDetails();
+            // Moved initial arrow check into loadProductDetails/loadRecommendations callbacks
+        });
+    </script>
+
+</body>
+</html> 

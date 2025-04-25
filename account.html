@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - Nour</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .account-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .account-container h1 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+         .logout-btn {
+            padding: 10px 20px;
+            background-color: #d9534f; /* Red color */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background-color: #c9302c;
+        }
+
+        /* Order History Styles */
+        .order-history {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 30px;
+        }
+        .order-history h2 {
+             margin-bottom: 20px;
+             font-weight: normal;
+        }
+        .order-card {
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        .order-card-header {
+             display: flex;
+             justify-content: space-between;
+             font-size: 0.9em;
+             color: #555;
+             border-bottom: 1px solid #eee;
+             padding-bottom: 10px;
+             margin-bottom: 15px;
+        }
+         .order-card-header strong {
+             color: #333;
+         }
+        .order-item {
+            display: grid;
+            grid-template-columns: 60px 1fr auto; /* Small image */
+            gap: 15px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+             border-bottom: 1px dotted #eee;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+             padding-bottom: 0;
+        }
+         .order-item img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+         }
+        .order-item-details span {
+             display: block;
+             color: #666;
+         }
+         .order-item-details strong {
+             color: #333;
+         }
+          .order-item-price {
+             text-align: right;
+             color: #333;
+         }
+         .no-orders-message {
+             color: #777;
+         }
+
+        /* Promotions Section Styles */
+        .promotions-section {
+             margin-top: 40px;
+             border-top: 1px solid #eee;
+             padding-top: 30px;
+        }
+         .promotions-section h2 {
+             margin-bottom: 20px;
+             font-weight: normal;
+         }
+        .promotion-item {
+             background-color: #f9f9f9;
+             border: 1px solid #eee;
+             border-left: 4px solid #007bff; /* Accent color */
+             padding: 15px;
+             margin-bottom: 15px;
+             border-radius: 4px;
+         }
+        .promotion-item strong { /* Promo Code */
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #0056b3;
+        }
+        .promotion-item p { /* Description */
+             margin-top: 5px;
+             font-size: 0.9em;
+             color: #555;
+         }
+         .no-promotions-message {
+              color: #777;
+         }
+
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <div class="account-container">
+        <h1>My Account</h1>
+        <p>Welcome back!</p>
+        <!-- User details could be loaded here later -->
+        <p>Email: <span id="user-email">Loading...</span></p> 
+        <p>Loyalty Points: <strong id="user-loyalty-points">Loading...</strong></p>
+        
+        <button id="logout-button" class="logout-btn">Logout</button>
+    </div>
+
+    <!-- Order History Section -->
+    <div class="account-container order-history">
+        <h2>Transaction History</h2>
+        <div id="order-history-list">
+            <p>Loading order history...</p>
+            <!-- Orders will be loaded here -->
+        </div>
+    </div>
+    <!-- End Order History Section -->
+
+    <!-- Promotions Section -->
+    <div class="account-container promotions-section">
+        <h2>Your Available Offers</h2>
+        <div id="promotions-list">
+            <p>Loading offers...</p>
+            <!-- Promotions will be loaded here -->
+        </div>
+    </div>
+    <!-- End Promotions Section -->
+
+    <!-- Link the main JavaScript file -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Page Protection --- 
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                // No token found, redirect to login page
+                console.log('No token found, redirecting to login.');
+                window.location.href = '/login.html';
+                return; // Stop further execution
+            }
+            // --- End Page Protection ---
+
+            // --- Logout Logic ---
+            const logoutButton = document.getElementById('logout-button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    // Remove token
+                    localStorage.removeItem('authToken');
+                    // Clear the cart as well
+                    localStorage.removeItem('shoppingCart'); 
+                    // Update header icon
+                    document.dispatchEvent(new CustomEvent('cartUpdated'));
+
+                    // Redirect to home or login page
+                    window.location.href = '/'; 
+                });
+            }
+            // --- End Logout Logic ---
+
+            // --- Fetch User Details ---
+            const userEmailSpan = document.getElementById('user-email');
+            const orderHistoryList = document.getElementById('order-history-list'); // Get order list container
+            const userLoyaltyPointsSpan = document.getElementById('user-loyalty-points'); // Get loyalty points container
+            const promotionsListDiv = document.getElementById('promotions-list'); // Get promotions list container
+
+            // Function to format date nicely
+            function formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+
+            // Function to format price
+             function formatPrice(price) {
+                 return `$${price.toFixed(2)}`;
+             }
+
+             async function fetchUserDetails() {
+                 if (!userEmailSpan) return;
+                 
+                try {
+                    const response = await fetch('http://localhost:3001/api/users/me', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}` // Send token in header
+                        }
+                    });
+
+                    if (!response.ok) {
+                        // Handle expired token or other auth errors
+                        if (response.status === 401) {
+                             console.log('Token invalid/expired, redirecting to login.');
+                             localStorage.removeItem('authToken'); // Clean up bad token
+                             window.location.href = '/login.html';
+                             return;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const userData = await response.json();
+                    userEmailSpan.textContent = userData.email || '[Email not found]';
+                    // You can display other user data here (e.g., username)
+
+                } catch (error) {
+                    console.error('Failed to fetch user details:', error);
+                    userEmailSpan.textContent = '[Error loading details]';
+                    // Optionally, redirect to login on persistent errors
+                }
+            }
+
+            fetchUserDetails(); // Call the function to load details
+            // --- End Fetch User Details ---
+            
+            // --- Fetch Loyalty Points ---
+            async function fetchLoyaltyPoints() {
+                if (!userLoyaltyPointsSpan || !token) return;
+                
+                try {
+                    const response = await fetch('http://localhost:3001/api/users/me/loyalty', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        // Don't redirect here, user details fetch should handle it
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    userLoyaltyPointsSpan.textContent = data.loyaltyPoints !== undefined ? data.loyaltyPoints : 'N/A';
+                } catch (error) {
+                    console.error('Failed to fetch loyalty points:', error);
+                    userLoyaltyPointsSpan.textContent = '[Error]';
+                }
+            }
+            fetchLoyaltyPoints(); // Call the function to load points
+            // --- End Fetch Loyalty Points ---
+
+            // --- Fetch Order History ---
+            async function fetchOrderHistory() {
+                if (!orderHistoryList || !token) return;
+                
+                orderHistoryList.innerHTML = '<p>Loading order history...</p>'; // Show loading message
+
+                try {
+                   const response = await fetch('http://localhost:3001/api/users/me/orders', {
+                       headers: { 'Authorization': `Bearer ${token}` }
+                   });
+
+                   if (!response.ok) {
+                        if (response.status === 401) {
+                            // Handled by user details fetch, but good to be safe
+                            orderHistoryList.innerHTML = '<p>Please log in to view orders.</p>';
+                            return;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const orders = await response.json();
+                    
+                    orderHistoryList.innerHTML = ''; // Clear loading message
+
+                    if (orders.length === 0) {
+                        orderHistoryList.innerHTML = '<p class="no-orders-message">You have not placed any orders yet.</p>';
+                        return;
+                    }
+                    
+                    // Render each order
+                    orders.forEach(order => {
+                        const orderCard = document.createElement('div');
+                        orderCard.className = 'order-card';
+                        
+                        let itemsHTML = '';
+                        order.items.forEach(item => {
+                            // Access the populated product image via item.productId
+                            const itemImage = (item.productId && item.productId.image) ? item.productId.image : '/assets/placeholder.png'; 
+                            
+                            itemsHTML += `
+                               <div class="order-item">
+                                   <img src="${itemImage}" alt="${item.name}">
+                                   <div class="order-item-details">
+                                        <strong>${item.name}</strong>
+                                        ${item.size && item.size !== 'N/A' ? `<span>Size: ${item.size}</span>` : ''}
+                                        ${item.color && item.color !== 'N/A' ? `<span>Color: ${item.color}</span>` : ''}
+                                        <span>Qty: ${item.quantity}</span>
+                                   </div>
+                                    <div class="order-item-price">
+                                        ${formatPrice(item.price * item.quantity)}
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        orderCard.innerHTML = `
+                            <div class="order-card-header">
+                                <span>Order Date: <strong>${formatDate(order.orderDate)}</strong></span>
+                                <span>Order ID: <strong>${order._id}</strong></span> 
+                                <span>Total: <strong>${formatPrice(order.totalAmount)}</strong></span>
+                            </div>
+                            ${itemsHTML}
+                        `;
+                        orderHistoryList.appendChild(orderCard);
+                    });
+
+                } catch (error) {
+                    console.error("Failed to fetch order history:", error);
+                    orderHistoryList.innerHTML = '<p class="error-message">Could not load order history.</p>';
+                }
+            }
+
+            fetchOrderHistory(); // Fetch orders when page loads (after user details potentially)
+            // --- End Fetch Order History ---
+            
+            // --- Fetch Available Promotions ---
+            async function fetchPromotions() {
+                if (!promotionsListDiv || !token) return;
+                
+                promotionsListDiv.innerHTML = '<p>Loading offers...</p>';
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/users/me/promotions', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const promotions = await response.json();
+
+                    promotionsListDiv.innerHTML = ''; // Clear loading
+
+                    if (promotions.length === 0) {
+                        promotionsListDiv.innerHTML = '<p class="no-promotions-message">No special offers available for you at this time.</p>';
+                        return;
+                    }
+
+                    promotions.forEach(promo => {
+                        const promoDiv = document.createElement('div');
+                        promoDiv.className = 'promotion-item';
+                        promoDiv.innerHTML = `
+                            <strong>${promo.code}</strong>
+                            <p>${promo.description}</p>
+                        `;
+                        // TODO: Add logic to display expiry, usage limits etc. if needed
+                        promotionsListDiv.appendChild(promoDiv);
+                    });
+
+                } catch (error) {
+                     console.error("Failed to fetch promotions:", error);
+                     promotionsListDiv.innerHTML = '<p class="error-message">Could not load offers.</p>';
+                }
+            }
+            fetchPromotions(); // Fetch promotions on page load
+            // --- End Fetch Available Promotions ---
+
+        });
+    </script>
+
+</body>
+</html> 

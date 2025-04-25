@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Demo - Nour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .api-buttons {
+            margin: 20px 0;
+        }
+        .api-buttons button {
+            margin-right: 10px;
+            padding: 8px 15px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <div class="demo-container">
+        <h1>API Demo</h1>
+        <p>This page demonstrates how to interact with the backend API endpoints.</p>
+
+        <div class="api-buttons">
+            <button id="get-all">Get All Products</button>
+            <button id="get-product-1">Get Product ID 1</button>
+            <button id="get-product-2">Get Product ID 2</button>
+        </div>
+
+        <h2>Response:</h2>
+        <pre id="response">Click a button above to make an API request.</pre>
+
+        <h2>Products from API:</h2>
+        <div id="product-list" class="product-list">
+            <!-- Products will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        // Function to make API requests
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`http://localhost:3001${endpoint}`);
+                const data = await response.json();
+                document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+                return data;
+            } catch (error) {
+                document.getElementById('response').textContent = `Error: ${error.message}`;
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+
+        // Function to display products
+        function displayProducts(products) {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            if (!Array.isArray(products)) {
+                products = [products]; // If single product, convert to array
+            }
+
+            products.forEach(product => {
+                if (!product) return; // Skip if product is null/undefined
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <div class="product-image-container">
+                        <img src="${product.image}" alt="${product.name}">
+                        ${product.isNew ? '<span class="product-tag new">New</span>' : ''}
+                        ${product.isBestSeller ? '<span class="product-tag best-seller">Best seller</span>' : ''}
+                    </div>
+                    <p class="product-name">${product.name}</p>
+                    <p class="product-price">$${product.price.toFixed(2)}</p>
+                `;
+                
+                productList.appendChild(productCard);
+            });
+        }
+
+        // Add event listeners to buttons
+        document.getElementById('get-all').addEventListener('click', async () => {
+            const products = await fetchAPI('/api/products');
+            if (products) displayProducts(products);
+        });
+
+        document.getElementById('get-product-1').addEventListener('click', async () => {
+            const product = await fetchAPI('/api/products/1');
+            if (product) displayProducts(product);
+        });
+
+        document.getElementById('get-product-2').addEventListener('click', async () => {
+            const product = await fetchAPI('/api/products/2');
+            if (product) displayProducts(product);
+        });
+
+        // Load the header
+        fetch('/_header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error loading header:', error);
+            });
+    </script>
+</body>
+</html> 

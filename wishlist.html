@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - Nour</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link Font Awesome (Moved to _header.html) -->
+    
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Add some specific styles for the wishlist page if needed */
+        .wishlist-page-main {
+            padding: 20px;
+            background-color: #fff;
+            min-height: 60vh; /* Ensure some height */
+        }
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .empty-wishlist-message {
+            text-align: center;
+            margin-top: 50px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <main class="wishlist-page-main">
+        <h1>My Wishlist</h1>
+        <div class="wishlist-grid">
+            <!-- Wishlist products will be loaded here dynamically -->
+            <p class="loading-message">Loading wishlist...</p>
+        </div>
+    </main>
+
+    <!-- Placeholder for the footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Link the main JavaScript file for header/footer loading -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const wishlistGrid = document.querySelector('.wishlist-grid');
+            const loadingMessage = document.querySelector('.loading-message');
+            const authToken = localStorage.getItem('authToken');
+
+            // Function to create a product card (similar to products.html)
+            function createProductCard(product) {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card'; // Reuse existing styles
+
+                let priceHTML = `$${product.price.toFixed(2)}`;
+                if (product.originalPrice && product.originalPrice > product.price) {
+                    priceHTML = `<span class="original-price">$${product.originalPrice.toFixed(2)}</span> ${priceHTML}`;
+                }
+
+                let tagsHTML = '';
+                if (product.isNew) tagsHTML += '<span class="product-tag new">New</span>';
+                if (product.isBestSeller) tagsHTML += '<span class="product-tag best-seller">Best seller</span>';
+                if (product.matchingSet) tagsHTML += '<span class="product-tag matching-set">Matching set</span>';
+
+                const productId = product._id;
+
+                // Wishlist button starts active (solid) on this page
+                productCard.innerHTML = `
+                    <button class="wishlist-btn active" data-product-id="${productId}"><i class="fas fa-heart"></i></button> 
+                    <div class="product-image-container">
+                        <img src="${product.image || '/assets/placeholder.png'}" alt="${product.name}">
+                        ${tagsHTML}
+                    </div>
+                    <div class="product-colors">
+                        ${product.colors && product.colors.length > 0 ? 
+                            product.colors.map(color => 
+                                `<span class="color-swatch" style="background-color: ${color}; ${color.toUpperCase() === '#FFFFFF' ? 'border: 1px solid #ccc;' : ''}"></span>`
+                            ).join('') 
+                            : ''
+                        }
+                    </div>
+                    <p class="product-name">${product.name}</p>
+                    <p class="product-price">${priceHTML}</p>
+                `;
+
+                 // Add click handler for removal (similar to products.html but removes card)
+                const wishlistButton = productCard.querySelector('.wishlist-btn');
+                wishlistButton.addEventListener('click', async () => {
+                     if (!authToken) {
+                         alert("Session expired. Please log in again.");
+                         window.location.href = '/login.html';
+                         return;
+                     }
+                     try {
+                         const response = await fetch(`http://localhost:3001/api/users/me/wishlist/${productId}`, {
+                             method: 'DELETE',
+                             headers: { 'Authorization': `Bearer ${authToken}` }
+                         });
+                         if (!response.ok) {
+                             const errorData = await response.json();
+                             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                         }
+                         // Remove card from view on success
+                         productCard.remove();
+                         console.log(`Product ${productId} removed from wishlist (and view).`);
+                         // Check if grid is now empty
+                         if (wishlistGrid.children.length === 0) {
+                             wishlistGrid.innerHTML = '<p class="empty-wishlist-message">Your wishlist is empty.</p>';
+                         } 
+                     } catch (error) {
+                         console.error('Failed to remove from wishlist:', error);
+                         alert(`Failed to remove item: ${error.message}`);
+                     }
+                 });
+
+                return productCard;
+            }
+
+            async function loadWishlistProducts() {
+                if (!authToken) {
+                    wishlistGrid.innerHTML = '<p class="empty-wishlist-message">Please <a href="/login.html">log in</a> to view your wishlist.</p>';
+                    if (loadingMessage) loadingMessage.remove();
+                    return;
+                }
+
+                try {
+                    // 1. Fetch wishlist IDs
+                    const wishlistResponse = await fetch('http://localhost:3001/api/users/me/wishlist', {
+                        headers: { 'Authorization': `Bearer ${authToken}` }
+                    });
+                    if (!wishlistResponse.ok) throw new Error(`Failed to fetch wishlist IDs: ${wishlistResponse.status}`);
+                    const wishlistIds = await wishlistResponse.json();
+
+                    if (wishlistIds.length === 0) {
+                        wishlistGrid.innerHTML = '<p class="empty-wishlist-message">Your wishlist is empty.</p>';
+                        if (loadingMessage) loadingMessage.remove();
+                        return;
+                    }
+
+                    // 2. Fetch product details for each ID (can be slow for large lists)
+                    // Consider a batch endpoint later if performance is an issue
+                    const productPromises = wishlistIds.map(id => 
+                        fetch(`http://localhost:3001/api/products/${id}`).then(res => {
+                            if (!res.ok) {
+                                console.error(`Failed to fetch product ${id}: ${res.status}`);
+                                return null; // Handle failed fetches gracefully
+                            }
+                            return res.json();
+                        })
+                    );
+                    
+                    const products = (await Promise.all(productPromises)).filter(p => p !== null); // Wait for all fetches and filter out errors
+                    
+                    if (loadingMessage) loadingMessage.remove();
+                    wishlistGrid.innerHTML = ''; // Clear loading/empty message
+                    
+                    if (products.length === 0) {
+                         wishlistGrid.innerHTML = '<p class="empty-wishlist-message">Could not load any wishlist items.</p>';
+                         return;
+                    }
+
+                    // 3. Display products
+                    products.forEach(product => {
+                        wishlistGrid.appendChild(createProductCard(product));
+                    });
+
+                } catch (error) {
+                    console.error('Failed to load wishlist products:', error);
+                    if (loadingMessage) loadingMessage.remove();
+                    wishlistGrid.innerHTML = '<p class="error-message">Failed to load your wishlist. Please try again later.</p>';
+                }
+            }
+
+            // Initial Load
+            loadWishlistProducts();
+        });
+    </script>
+
+</body>
+</html> 

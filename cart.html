@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Bag - Nour</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link Font Awesome (loaded via _header.html now) -->
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for Cart Page */
+        .cart-page-main {
+            padding: 40px 20px;
+            background-color: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cart-page-main h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: normal;
+            font-size: 2em;
+            letter-spacing: 1px; /* Match example */
+            font-family: serif; /* Match example */
+        }
+
+        .cart-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Adjust ratio as needed */
+            gap: 40px;
+        }
+
+        .cart-items-list {
+            border-top: 1px solid #eee;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto; /* Image | Details | Price */
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-image img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .cart-item-details {
+            font-size: 0.9em;
+            display: flex;
+            flex-direction: column;
+            gap: 5px; /* Space between detail lines */
+        }
+        .cart-item-details strong { /* Brand/Name */
+             font-size: 1.1em;
+             font-weight: bold;
+        }
+         .cart-item-details span { /* Size, Color, Qty */
+             color: #555;
+         }
+
+        .cart-item-actions {
+            margin-top: 10px;
+        }
+        .cart-item-actions button {
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: underline;
+            font-size: 0.85em;
+            cursor: pointer;
+            color: #555;
+            margin-right: 15px;
+        }
+        .cart-item-actions button:hover {
+            color: #000;
+        }
+
+        .cart-item-price {
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .cart-summary {
+            border: 1px solid #eee;
+            padding: 20px;
+            background-color: #fdfdfd;
+            height: fit-content; /* Prevent stretching */
+        }
+
+        .cart-summary h2 {
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .summary-line.total {
+            font-weight: bold;
+            font-size: 1em;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .checkout-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        .checkout-button:hover {
+            background-color: #333;
+        }
+
+        .empty-cart-message {
+             text-align: center;
+             margin-top: 50px;
+             color: #777;
+             border-top: 1px solid #eee;
+             padding-top: 30px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+             .cart-layout {
+                 grid-template-columns: 1fr; /* Stack columns */
+             }
+             .cart-summary {
+                 margin-top: 30px;
+             }
+              .cart-item {
+                 grid-template-columns: 80px 1fr auto; /* Smaller image column */
+                 gap: 15px;
+             }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <main class="cart-page-main">
+        <h1>YOUR SHOPPING BAG</h1>
+
+        <div class="cart-layout">
+            <!-- Left Column: Cart Items -->
+            <div class="cart-items-section">
+                <div class="cart-items-list" id="cart-items-list">
+                    <!-- Cart items will be loaded here -->
+                    <p class="loading-message">Loading your bag...</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Summary -->
+            <div class="cart-summary-section">
+                <div class="cart-summary" id="cart-summary">
+                    <h2>ORDER SUMMARY</h2>
+                    <div class="summary-line">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">$0.00</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Shipping</span>
+                        <span>Calculated at next step</span>
+                    </div>
+                    <!-- Add Estimated Tax line if needed -->
+                    <div class="summary-line total">
+                        <span>Estimated Total</span>
+                        <span id="summary-total">$0.00</span>
+                    </div>
+                    <button class="checkout-button">PROCEED TO CHECKOUT</button>
+                    <!-- Add other payment options like PayPal here if needed -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Placeholder for the footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Link the main JavaScript file for header/footer loading -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cartItemsList = document.getElementById('cart-items-list');
+            const cartSummary = document.getElementById('cart-summary');
+            const summarySubtotal = document.getElementById('summary-subtotal');
+            const summaryTotal = document.getElementById('summary-total');
+            const cartItemsSection = document.querySelector('.cart-items-section'); // To show empty message
+            const checkoutButton = document.querySelector('.checkout-button'); // Get checkout button
+
+            function formatPrice(price) {
+                return `$${price.toFixed(2)}`;
+            }
+
+            function calculateSubtotal(cart) {
+                 return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            }
+
+            function renderCart() {
+                try {
+                    const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                    cartItemsList.innerHTML = ''; // Clear loading/previous items
+
+                    if (cart.length === 0) {
+                        cartItemsList.innerHTML = '<p class="empty-cart-message">Your shopping bag is empty.</p>';
+                        cartSummary.style.display = 'none'; // Hide summary if cart is empty
+                        return;
+                    } else {
+                         cartSummary.style.display = 'block'; // Ensure summary is visible
+                    }
+
+                    cart.forEach((item, index) => {
+                        const cartItemElement = document.createElement('div');
+                        cartItemElement.className = 'cart-item';
+                        cartItemElement.dataset.index = index; // Store index for removal
+                        cartItemElement.dataset.id = item.id; // Store id for removal
+                        cartItemElement.dataset.color = item.color;
+                        cartItemElement.dataset.size = item.size;
+                        
+                        const itemTotalPrice = item.price * item.quantity;
+
+                        cartItemElement.innerHTML = `
+                            <div class="cart-item-image">
+                                <img src="${item.image || '/assets/placeholder.png'}" alt="${item.name}">
+                            </div>
+                            <div class="cart-item-details">
+                                <strong>${item.name}</strong> 
+                                ${item.size !== 'N/A' ? `<span>Size: ${item.size}</span>` : ''}
+                                ${item.color !== 'N/A' ? `<span>Color: ${item.color}</span>` : ''}
+                                <span>Qty: ${item.quantity}</span>
+                                <div class="cart-item-actions">
+                                    <button class="remove-item-btn">Remove</button>
+                                    <!-- Add Edit/Save for Later later -->
+                                </div>
+                            </div>
+                            <div class="cart-item-price">
+                                ${formatPrice(itemTotalPrice)}
+                            </div>
+                        `;
+
+                        // Add event listener for remove button
+                        const removeButton = cartItemElement.querySelector('.remove-item-btn');
+                        removeButton.addEventListener('click', () => {
+                            removeItemFromCart(index); 
+                        });
+
+                        cartItemsList.appendChild(cartItemElement);
+                    });
+
+                    // Update Summary
+                    const subtotal = calculateSubtotal(cart);
+                    summarySubtotal.textContent = formatPrice(subtotal);
+                    summaryTotal.textContent = formatPrice(subtotal); // Update total (assuming no tax/shipping yet)
+                    
+                    // Update header icon (needs global function)
+                    if (typeof updateCartIconCount === 'function') {
+                        updateCartIconCount();
+                    }
+
+                } catch (error) {
+                    console.error("Error rendering cart:", error);
+                    cartItemsList.innerHTML = '<p class="error-message">Could not load your shopping bag.</p>';
+                    cartSummary.style.display = 'none';
+                }
+            }
+            
+            function removeItemFromCart(indexToRemove) {
+                try {
+                    let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                    cart.splice(indexToRemove, 1); // Remove item at the specified index
+                    localStorage.setItem('shoppingCart', JSON.stringify(cart));
+                    
+                    // Re-render the cart UI
+                    renderCart(); 
+
+                    // --- Explicitly update header icon --- 
+                    document.dispatchEvent(new CustomEvent('cartUpdated')); // Dispatch event
+
+                } catch (error) {
+                     console.error("Error removing item from cart:", error);
+                     alert("Failed to remove item from bag.");
+                }
+            }
+
+            // --- Checkout Button Logic ---
+            checkoutButton.addEventListener('click', () => { // Make non-async
+                 const authToken = localStorage.getItem('authToken');
+                 if (!authToken) {
+                     window.location.href = '/register.html'; // Redirect to register
+                     return;
+                 }
+
+                 const cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];
+                 if (cart.length === 0) {
+                     alert("Your shopping bag is empty.");
+                     return;
+                 }
+                 
+                 // Save cart to sessionStorage for shipping page
+                 try {
+                    sessionStorage.setItem('checkoutCart', JSON.stringify(cart));
+                    // Redirect to shipping page
+                    window.location.href = '/shipping.html';
+                 } catch (error) {
+                     console.error("Error saving cart to sessionStorage:", error);
+                     alert("Could not proceed to checkout. Please try again.");
+                 }
+
+                 // Remove the direct API call logic from here
+                 /* 
+                 // Disable button while processing
+                 checkoutButton.disabled = true;
+                 checkoutButton.textContent = 'PROCESSING...';
+                ... rest of old fetch logic ...
+                 */
+            });
+            // --- End Checkout Button Logic ---
+
+            // Initial Render
+            renderCart();
+        });
+    </script>
+
+</body>
+</html> 

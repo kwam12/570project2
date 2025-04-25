@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping - Nour</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for Shipping Page */
+        .shipping-page-main {
+            padding: 40px 20px;
+            background-color: #fff;
+            max-width: 1000px; /* Adjust as needed */
+            margin: 0 auto;
+        }
+
+        .shipping-page-main h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: normal;
+        }
+
+        .shipping-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Form | Summary */
+            gap: 40px;
+        }
+
+        .shipping-form-section h2, .cart-summary-section h2 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: normal;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .shipping-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .shipping-form input[type="text"],
+        .shipping-form input[type="email"], /* If needed */
+        .shipping-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        .shipping-form button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        .shipping-form button:hover {
+            background-color: #333;
+        }
+        .shipping-form button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+
+        /* Cart Summary Styles (reuse/adapt from cart.html if possible) */
+        .cart-summary-section {
+            border-left: 1px solid #eee;
+            padding-left: 40px;
+        }
+        .summary-item {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85em;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+             border-bottom: 1px dotted #eee;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+             padding-bottom: 0;
+        }
+         .summary-item img {
+            max-width: 60px;
+            height: auto;
+            display: block;
+         }
+        .summary-item-details span {
+             display: block;
+             color: #666;
+         }
+         .summary-item-details strong {
+             color: #333;
+         }
+         .summary-item-price {
+             margin-left: auto; /* Push price to the right */
+             text-align: right;
+             color: #333;
+             font-weight: bold;
+         }
+         .summary-total {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+         }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+             .shipping-layout {
+                 grid-template-columns: 1fr; /* Stack columns */
+             }
+             .cart-summary-section {
+                 margin-top: 30px;
+                 border-left: none;
+                 padding-left: 0;
+                 border-top: 1px solid #eee;
+                 padding-top: 30px;
+             }
+        }
+         .error-message {
+             color: #d9534f;
+             font-size: 0.9em;
+             margin-top: 10px;
+         }
+
+        /* Promo Code Section */
+        .promo-code-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .promo-code-section label {
+             display: block;
+             margin-bottom: 8px;
+             font-size: 0.9em;
+             color: #555;
+        }
+        .promo-input-group {
+            display: flex;
+        }
+        .promo-input-group input[type="text"] {
+             flex-grow: 1;
+             padding: 8px 10px;
+             border: 1px solid #ccc;
+             border-radius: 3px 0 0 3px;
+             font-size: 0.9em;
+             margin: 0; /* Reset margin */
+        }
+        .promo-input-group button {
+             padding: 8px 15px;
+             border: 1px solid #ccc;
+             border-left: none;
+             background-color: #f0f0f0;
+             cursor: pointer;
+             border-radius: 0 3px 3px 0;
+             font-size: 0.9em;
+         }
+         .promo-input-group button:hover {
+             background-color: #e0e0e0;
+         }
+        .promo-status-message {
+             margin-top: 10px;
+             font-size: 0.85em;
+        }
+         .promo-status-message.success {
+             color: green;
+         }
+         .promo-status-message.error {
+             color: red;
+         }
+
+        /* Summary Discount/Total Lines */
+        .summary-discount,
+        .summary-final-total {
+             display: flex;
+             justify-content: space-between;
+             margin-top: 10px;
+             font-size: 0.9em;
+        }
+         .summary-discount {
+             color: green; /* Indicate discount */
+         }
+         .summary-final-total {
+             font-weight: bold;
+             font-size: 1.1em;
+             margin-top: 15px;
+             padding-top: 10px;
+             border-top: 1px solid #eee;
+         }
+
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <main class="shipping-page-main">
+        <h1>Shipping Information</h1>
+
+        <div class="shipping-layout">
+            <!-- Left Column: Shipping Form -->
+            <div class="shipping-form-section">
+                <h2>Shipping Address</h2>
+                <form id="shipping-form">
+                    <div>
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" required>
+                    </div>
+                    <div>
+                        <label for="streetAddress">Street Address</label>
+                        <input type="text" id="streetAddress" name="streetAddress" required>
+                    </div>
+                     <div>
+                        <label for="aptSuite">Apartment, suite, etc. (Optional)</label>
+                        <input type="text" id="aptSuite" name="aptSuite">
+                    </div>
+                    <div>
+                        <label for="city">City</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                    <div>
+                        <label for="country">Country</label>
+                        <select id="country" name="country" required>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                     <div>
+                        <label for="state">State / Province</label>
+                        <input type="text" id="state" name="state" required>
+                         <!-- Consider using a dropdown for US states -->
+                    </div>
+                    <div>
+                        <label for="postalCode">Postal Code</label>
+                        <input type="text" id="postalCode" name="postalCode" required>
+                    </div>
+                     <div>
+                        <label for="phone">Phone (Optional)</label>
+                        <input type="text" id="phone" name="phone">
+                    </div>
+
+                    <button type="submit" id="place-order-btn">PLACE ORDER</button>
+                    <p id="form-error" class="error-message" style="display: none;"></p>
+                </form>
+            </div>
+
+            <!-- Right Column: Summary -->
+            <div class="cart-summary-section">
+                <h2>Order Summary</h2>
+                <div id="summary-items-list">
+                    <!-- Summary items will be loaded here -->
+                    <p class="loading-message">Loading summary...</p>
+                </div>
+                 <div class="summary-total">
+                    <span>Subtotal</span>
+                    <span id="summary-subtotal">$0.00</span>
+                </div>
+                
+                <!-- Promotion Code Input -->
+                <div class="promo-code-section">
+                    <label for="promo-code">Promo Code</label>
+                    <div class="promo-input-group">
+                        <input type="text" id="promo-code" name="promoCode">
+                        <button type="button" id="apply-promo-btn">Apply</button>
+                    </div>
+                    <p id="promo-message" class="promo-status-message" style="display: none;"></p>
+                </div>
+                <!-- End Promotion Code Input -->
+                
+                 <div class="summary-discount" style="display: none;"> <!-- Hidden initially -->
+                    <span>Discount</span>
+                    <span id="summary-discount-amount">-$0.00</span>
+                </div>
+                 <div class="summary-final-total">
+                    <span>Total</span>
+                    <span id="summary-total">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Placeholder for the footer -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Link the main JavaScript file for header/footer loading -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const summaryItemsList = document.getElementById('summary-items-list');
+            const summaryTotalSpan = document.getElementById('summary-total');
+            const shippingForm = document.getElementById('shipping-form');
+            const placeOrderBtn = document.getElementById('place-order-btn');
+            const formErrorP = document.getElementById('form-error');
+            const summarySubtotalSpan = document.getElementById('summary-subtotal');
+            const summaryDiscountDiv = document.querySelector('.summary-discount');
+            const summaryDiscountAmountSpan = document.getElementById('summary-discount-amount');
+            const promoCodeInput = document.getElementById('promo-code');
+            const applyPromoBtn = document.getElementById('apply-promo-btn');
+            const promoMessageP = document.getElementById('promo-message');
+
+            let checkoutCart = null;
+            let currentSubTotal = 0;
+            let appliedPromotion = null;
+
+            function formatPrice(price) {
+                return `$${price.toFixed(2)}`;
+            }
+
+            // --- Load Cart from Session Storage ---
+            try {
+                const cartString = sessionStorage.getItem('checkoutCart');
+                if (!cartString) {
+                    throw new Error('Checkout cart not found in session storage.');
+                }
+                checkoutCart = JSON.parse(cartString);
+                if (!Array.isArray(checkoutCart) || checkoutCart.length === 0) {
+                    throw new Error('Checkout cart is empty or invalid.');
+                }
+            } catch (error) {
+                console.error("Error loading cart from session storage:", error);
+                summaryItemsList.innerHTML = '<p class="error-message">Could not load order summary. Please return to your bag.</p>';
+                if (shippingForm) shippingForm.style.display = 'none'; // Hide form if cart is bad
+                return; // Stop execution
+            }
+
+            // --- Render Cart Summary ---
+            summaryItemsList.innerHTML = ''; // Clear loading
+            currentSubTotal = 0;
+            checkoutCart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                currentSubTotal += itemTotal;
+
+                const summaryItem = document.createElement('div');
+                summaryItem.className = 'summary-item';
+                summaryItem.innerHTML = `
+                    <img src="${item.image || '/assets/placeholder.png'}" alt="${item.name}">
+                    <div class="summary-item-details">
+                        <strong>${item.name}</strong>
+                        ${item.size && item.size !== 'N/A' ? `<span>Size: ${item.size}</span>` : ''}
+                        ${item.color && item.color !== 'N/A' ? `<span>Color: ${item.color}</span>` : ''}
+                        <span>Qty: ${item.quantity}</span>
+                    </div>
+                    <div class="summary-item-price">${formatPrice(itemTotal)}</div>
+                `;
+                summaryItemsList.appendChild(summaryItem);
+            });
+            summarySubtotalSpan.textContent = formatPrice(currentSubTotal);
+            summaryTotalSpan.textContent = formatPrice(currentSubTotal);
+            updateDisplayTotals();
+
+            // --- Apply Promo Code Logic ---
+            applyPromoBtn.addEventListener('click', async () => {
+                const code = promoCodeInput.value.trim();
+                if (!code) {
+                    promoMessageP.textContent = 'Please enter a code.';
+                    promoMessageP.className = 'promo-status-message error';
+                    promoMessageP.style.display = 'block';
+                    return;
+                }
+
+                promoMessageP.style.display = 'none';
+                applyPromoBtn.disabled = true;
+                applyPromoBtn.textContent = 'Applying...';
+
+                const authToken = localStorage.getItem('authToken');
+                if (!authToken) {
+                    alert('Authentication token not found. Please log in again.');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                try {
+                    const response = await fetch('http://localhost:3001/api/apply-promotion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify({ code: code })
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+                    }
+
+                    appliedPromotion = result;
+                    promoMessageP.textContent = result.description || result.message;
+                    promoMessageP.className = 'promo-status-message success';
+                    updateDisplayTotals();
+
+                } catch (error) {
+                    console.error('Failed to apply promo code:', error);
+                    appliedPromotion = null;
+                    promoMessageP.textContent = error.message;
+                    promoMessageP.className = 'promo-status-message error';
+                    updateDisplayTotals();
+                } finally {
+                    promoMessageP.style.display = 'block';
+                    applyPromoBtn.disabled = false;
+                    applyPromoBtn.textContent = 'Apply';
+                }
+            });
+
+            // --- Function to Update Displayed Totals ---
+            function updateDisplayTotals() {
+                 let discountAmount = 0;
+                 let finalTotal = currentSubTotal;
+
+                 if (appliedPromotion) {
+                     if (appliedPromotion.discountType === 'PERCENTAGE') {
+                         discountAmount = (currentSubTotal * appliedPromotion.discountValue) / 100;
+                     } else if (appliedPromotion.discountType === 'FIXED_AMOUNT') {
+                         discountAmount = appliedPromotion.discountValue;
+                     }
+
+                     discountAmount = Math.min(discountAmount, currentSubTotal);
+                     finalTotal = currentSubTotal - discountAmount;
+
+                     summaryDiscountAmountSpan.textContent = `-${formatPrice(discountAmount)}`;
+                     summaryDiscountDiv.style.display = 'flex';
+                 } else {
+                     summaryDiscountDiv.style.display = 'none';
+                 }
+
+                 summarySubtotalSpan.textContent = formatPrice(currentSubTotal);
+                 summaryTotalSpan.textContent = formatPrice(finalTotal);
+            }
+
+            // --- Handle Form Submission ---
+            shippingForm.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Prevent default page reload
+                placeOrderBtn.disabled = true;
+                placeOrderBtn.textContent = 'PLACING ORDER...';
+                formErrorP.style.display = 'none'; // Hide previous errors
+
+                const authToken = localStorage.getItem('authToken');
+                if (!authToken) {
+                    alert('Authentication token not found. Please log in again.');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                // Basic validation
+                const formData = new FormData(shippingForm);
+                const shippingAddress = {
+                    fullName: formData.get('fullName'),
+                    streetAddress: formData.get('streetAddress'),
+                    aptSuite: formData.get('aptSuite') || '', // Optional
+                    city: formData.get('city'),
+                    state: formData.get('state'),
+                    postalCode: formData.get('postalCode'),
+                    country: formData.get('country'),
+                    phone: formData.get('phone') || '' // Optional
+                };
+
+                if (!shippingAddress.fullName || !shippingAddress.streetAddress || !shippingAddress.city || !shippingAddress.state || !shippingAddress.postalCode || !shippingAddress.country) {
+                     formErrorP.textContent = 'Please fill in all required address fields.';
+                     formErrorP.style.display = 'block';
+                     placeOrderBtn.disabled = false;
+                     placeOrderBtn.textContent = 'PLACE ORDER';
+                    return;
+                }
+
+                const orderData = {
+                    cart: checkoutCart,
+                    shippingAddress: shippingAddress,
+                    appliedPromoCode: appliedPromotion ? appliedPromotion.code : null
+                };
+
+                console.log('--- Order Data to Send ---');
+                console.log(JSON.stringify(orderData, null, 2));
+
+                // --- Implement the actual fetch call to POST /api/checkout ---
+                try {
+                    const response = await fetch('http://localhost:3001/api/checkout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('Order placed successfully:', result);
+
+                    // Clear carts
+                    localStorage.removeItem('shoppingCart');
+                    sessionStorage.removeItem('checkoutCart');
+
+                    // Dispatch event to update header icon
+                    document.dispatchEvent(new CustomEvent('cartUpdated')); 
+
+                    // Redirect to account page or order confirmation page
+                    alert('Order placed successfully!');
+                    window.location.href = '/account.html'; 
+
+                } catch (error) {
+                    console.error('Checkout failed:', error);
+                    formErrorP.textContent = `Checkout failed: ${error.message}`;
+                    formErrorP.style.display = 'block';
+                } finally {
+                     placeOrderBtn.disabled = false;
+                     placeOrderBtn.textContent = 'PLACE ORDER';
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html> 

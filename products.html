@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Nour Clone</title>
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link the existing stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div id="header-placeholder"></div> <!-- Placeholder for the header -->
+
+    <main class="product-page-main">
+        <div class="filter-sort-bar">
+            <div class="filters">
+                <button class="filter-btn filter-status" data-filter-type="isNew" data-filter-value="true">New Arrivals</button>
+                <button class="filter-btn filter-status" data-filter-type="isBestSeller" data-filter-value="true">Best Sellers</button>
+                <select class="filter-select category-select">
+                    <option value="">All Categories</option>
+                    <option value="shoes">Shoes</option>
+                    <option value="clothes">Clothes</option>
+                </select>
+                <select class="filter-select size-select">
+                    <option value="">All Sizes</option>
+                    <optgroup label="Clothing">
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                    </optgroup>
+                    <optgroup label="Shoes">
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </optgroup>
+                </select>
+                <select class="filter-select color-select">
+                    <option value="">All Colors</option>
+                    <option value="#FFFFFF">White</option>
+                    <option value="#000000">Black</option>
+                    <option value="#F5F5DC">Beige</option>
+                    <option value="#A0522D">Brown</option>
+                    <option value="#FF0000">Red</option>
+                    <option value="#ADD8E6">Light Blue</option>
+                    <option value="#FFC0CB">Pink</option>
+                </select>
+                <span class="item-count"></span>
+            </div>
+            <div class="sort-container">
+                 <select class="sort-dropdown">
+                    <option value="featured">Sort</option>
+                    <option value="best-selling">Best Selling</option>
+                    <option value="price-asc">Price, low to high</option>
+                    <option value="price-desc">Price, high to low</option>
+                 </select>
+            </div>
+        </div>
+
+        <div class="active-filters">
+            <!-- Removed hardcoded Women filter tag -->
+            <!-- Add more active filters here -->
+        </div>
+
+        <div class="section-title">
+            <hr>
+            <span>EXPLORE OUR FAVORITES</span>
+            <hr>
+        </div>
+
+        <div class="product-grid">
+            <!-- Products will be loaded here dynamically -->
+            <p class="loading-message">Loading products...</p> <!-- Add a loading indicator -->
+        </div>
+    </main>
+
+    <!-- Optional: Include the same footer as index.html for consistency -->
+    <!-- You can copy/paste the footer from index.html here if desired -->
+
+    <!-- Link the main JavaScript file -->
+    <script type="module" src="/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const productGrid = document.querySelector('.product-grid');
+            const loadingMessage = document.querySelector('.loading-message');
+            const sortDropdown = document.querySelector('.sort-dropdown');
+            const categorySelect = document.querySelector('.category-select');
+            const colorSelect = document.querySelector('.color-select');
+            const sizeSelect = document.querySelector('.size-select');
+            const statusFilterButtons = document.querySelectorAll('.filter-status'); // Get status buttons
+            const activeFiltersContainer = document.querySelector('.active-filters'); // Get active filters container
+            const itemCountSpan = document.querySelector('.item-count');
+
+            // Store current filter/sort state
+            let currentSort = '';
+            let currentCategory = '';
+            let currentColor = '';
+            let currentSize = '';
+            let currentIsNew = false;
+            let currentIsBestSeller = false;
+            let userWishlist = new Set(); // Store wishlist product IDs
+            const authToken = localStorage.getItem('authToken'); // Get auth token
+
+            // --- Fetch User Wishlist (if logged in) ---
+            async function fetchWishlist() {
+                if (!authToken) return; // Don't fetch if not logged in
+                try {
+                    const response = await fetch('http://localhost:3001/api/users/me/wishlist', {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                             console.log("User not authenticated for wishlist fetch.");
+                             // Maybe clear invalid token?
+                             // localStorage.removeItem('authToken');
+                        } else {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return; // Don't proceed if error
+                    }
+                    const wishlistIds = await response.json();
+                    userWishlist = new Set(wishlistIds); // Store IDs in the Set
+                    console.log("Fetched user wishlist:", userWishlist);
+                } catch (error) {
+                    console.error('Failed to fetch wishlist:', error);
+                }
+            }
+
+            // --- Check URL for initial filter ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialFilter = urlParams.get('filter');
+            const initialCategory = urlParams.get('category');
+            const searchQuery = urlParams.get('search'); // Get search query
+
+            if (initialFilter === 'new') {
+                currentIsNew = true;
+            } else if (initialFilter === 'bestsellers') {
+                currentIsBestSeller = true;
+            }
+            if (initialCategory) {
+                currentCategory = initialCategory;
+                if (categorySelect) {
+                    categorySelect.value = initialCategory;
+                }
+            }
+            // --- End URL Check ---
+
+            async function loadProducts() {
+                if (loadingMessage) productGrid.appendChild(loadingMessage);
+                if (itemCountSpan) itemCountSpan.textContent = '';
+                try {
+                    let apiUrl = 'http://localhost:3001/api/products'; // Default API endpoint
+                    const params = new URLSearchParams();
+
+                    // Check if there is a search query
+                    if (searchQuery) {
+                        apiUrl = 'http://localhost:3001/api/search'; // Use search endpoint
+                        params.set('q', searchQuery); 
+                        // When searching, usually other filters are ignored, adjust if needed
+                        // Maybe disable filter controls or clear other filter states?
+                    } else {
+                         // Only apply other filters if not searching
+                        if (currentSort) params.set('sort', currentSort);
+                        if (currentCategory) params.set('category', currentCategory);
+                        if (currentColor) params.set('color', currentColor);
+                        if (currentSize) params.set('size', currentSize);
+                        if (currentIsNew) params.set('isNew', 'true'); 
+                        if (currentIsBestSeller) params.set('isBestSeller', 'true');
+                    }
+                    
+                    const queryString = params.toString();
+                    apiUrl = `${apiUrl}${queryString ? '?' + queryString : ''}`;
+
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    // Adjust response handling based on endpoint
+                    let products;
+                    let totalCount = null;
+                    if (searchQuery) {
+                        products = data; // Search endpoint returns array directly
+                        totalCount = products.length; // Count the results client-side
+                    } else {
+                        products = data.products; // Standard endpoint returns object
+                        totalCount = data.totalCount;
+                    }
+
+                    if (itemCountSpan) {
+                        itemCountSpan.textContent = totalCount !== null ? `${totalCount} Items` : '';
+                    }
+
+                    if (loadingMessage) loadingMessage.remove();
+                    productGrid.innerHTML = '';
+
+                    if (products.length === 0) {
+                         productGrid.innerHTML = '<p>No products found.</p>';
+                         return;
+                    }
+
+                    products.forEach(product => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        
+                        let priceHTML = `$${product.price.toFixed(2)}`;
+                        if (product.originalPrice && product.originalPrice > product.price) {
+                            priceHTML = `<span class="original-price">$${product.originalPrice.toFixed(2)}</span> ${priceHTML}`;
+                        }
+                        
+                        let tagsHTML = '';
+                        if (product.isNew) tagsHTML += '<span class="product-tag new">New</span>';
+                        if (product.isBestSeller) tagsHTML += '<span class="product-tag best-seller">Best seller</span>';
+                        if (product.matchingSet) tagsHTML += '<span class="product-tag matching-set">Matching set</span>';
+
+                        const productId = product._id;
+
+                        // --- Star Rating Display --- 
+                        let ratingHTML = '<div class="product-rating-placeholder"></div>'; // Placeholder if no rating
+                        if (product.averageRating && product.numReviews > 0) {
+                             const rating = Math.round(product.averageRating * 2) / 2; // Round to nearest 0.5
+                             let stars = '';
+                             for (let i = 1; i <= 5; i++) {
+                                 if (i <= rating) {
+                                     stars += '<i class="fas fa-star"></i>'; // Full star
+                                 } else if (i - 0.5 === rating) {
+                                     stars += '<i class="fas fa-star-half-alt"></i>'; // Half star
+                                 } else {
+                                     stars += '<i class="far fa-star"></i>'; // Empty star
+                                 }
+                             }
+                            ratingHTML = `<div class="product-rating">${stars} (${product.numReviews})</div>`;
+                        }
+                        // --- End Star Rating --- 
+
+                        productCard.innerHTML = `
+                            <button class="wishlist-btn" data-product-id="${productId}"><i class="far fa-heart"></i></button> <!-- Initial state is outline -->
+                            <a href="/product-detail.html?id=${productId}" class="product-card-link">
+                                <div class="product-image-container">
+                                    <img src="${product.image || '/assets/placeholder.png'}" alt="${product.name}">
+                                    ${tagsHTML}
+                                </div>
+                                ${ratingHTML}
+                                <div class="product-colors">
+                                    ${product.colors && product.colors.length > 0 ? 
+                                        product.colors.map(color => 
+                                            `<span class="color-swatch" style="background-color: ${color}; ${color.toUpperCase() === '#FFFFFF' ? 'border: 1px solid #ccc;' : ''}"></span>`
+                                        ).join('') 
+                                        : ''
+                                    }
+                                </div>
+                                <p class="product-name">${product.name}</p>
+                                <p class="product-price">${priceHTML}</p>
+                            </a>
+                        `;
+                        productGrid.appendChild(productCard);
+                    });
+                } catch (error) {
+                    console.error('Failed to load products:', error);
+                    if (loadingMessage) loadingMessage.remove();
+                    productGrid.innerHTML = '<p class="error-message">Failed to load products. Please try again later.</p>';
+                }
+            }
+
+            // Function to update active filter display (basic version)
+            function updateActiveFiltersDisplay() {
+                activeFiltersContainer.innerHTML = '';
+
+                // Add visual feedback for status filters based on state
+                statusFilterButtons.forEach(button => {
+                    const filterType = button.dataset.filterType;
+                    button.classList.remove('active'); // Ensure clean state
+                    if (currentIsNew && filterType === 'isNew') button.classList.add('active');
+                    if (currentIsBestSeller && filterType === 'isBestSeller') button.classList.add('active');
+                });
+                
+                // Add logic here later to dynamically create tags based on current filter state
+            }
+
+            // Event listener for sort dropdown
+            sortDropdown.addEventListener('change', (event) => {
+                currentSort = event.target.value;
+                loadProducts();
+            });
+
+            // Event listener for category select
+            categorySelect.addEventListener('change', (event) => {
+                currentCategory = event.target.value;
+                updateActiveFiltersDisplay(); // Update display
+                loadProducts();
+            });
+
+            // Event listener for color select
+            colorSelect.addEventListener('change', (event) => {
+                currentColor = event.target.value;
+                updateActiveFiltersDisplay(); // Update display
+                loadProducts();
+            });
+
+             // Event listener for size select
+            sizeSelect.addEventListener('change', (event) => {
+                currentSize = event.target.value;
+                updateActiveFiltersDisplay(); // Update display
+                loadProducts();
+            });
+
+            // Event listeners for status filter buttons (toggle behavior)
+            statusFilterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const filterType = button.dataset.filterType; // 'isNew' or 'isBestSeller'
+                    // Toggle the state
+                    if (filterType === 'isNew') {
+                        currentIsNew = !currentIsNew;
+                        // Optionally, ensure only one status filter is active at a time
+                        if (currentIsNew) currentIsBestSeller = false; 
+                    } else if (filterType === 'isBestSeller') {
+                        currentIsBestSeller = !currentIsBestSeller;
+                        // Optionally, ensure only one status filter is active at a time
+                         if (currentIsBestSeller) currentIsNew = false;
+                    }
+
+                    // Add visual feedback (e.g., add/remove an 'active' class)
+                    statusFilterButtons.forEach(btn => btn.classList.remove('active')); // Remove from all
+                    if (currentIsNew && filterType === 'isNew') button.classList.add('active');
+                    if (currentIsBestSeller && filterType === 'isBestSeller') button.classList.add('active');
+                    
+                    updateActiveFiltersDisplay(); // Update display
+                    loadProducts(); // Reload products with new state
+                });
+            });
+
+            // Initial load
+            updateActiveFiltersDisplay(); // Update display based on URL params or defaults
+            // Fetch wishlist first, then load products and set up listeners
+            fetchWishlist().then(() => {
+                loadProducts().then(() => {
+                    // Set initial state of wishlist buttons AFTER products are loaded
+                    const wishlistButtons = productGrid.querySelectorAll('.wishlist-btn');
+                    wishlistButtons.forEach(button => {
+                        const productId = button.dataset.productId;
+                        if (userWishlist.has(productId)) {
+                             button.classList.add('active');
+                             const icon = button.querySelector('i');
+                             icon.classList.remove('far');
+                             icon.classList.add('fas'); // Set to solid if in wishlist
+                        }
+                    });
+
+                    // --- Wishlist Button Click Handler (after products loaded) ---
+                    wishlistButtons.forEach(button => {
+                        button.addEventListener('click', async () => { // Make async
+                            if (!authToken) {
+                                // Redirect to login or show message if not logged in
+                                window.location.href = '/register.html'; // Redirect to register
+                                return;
+                            }
+
+                            const productId = button.dataset.productId;
+                            const icon = button.querySelector('i');
+                            const isActive = button.classList.contains('active');
+                            let method, url;
+
+                            if (isActive) {
+                                // Remove from wishlist
+                                method = 'DELETE';
+                                url = `http://localhost:3001/api/users/me/wishlist/${productId}`;
+                            } else {
+                                // Add to wishlist
+                                method = 'POST';
+                                url = 'http://localhost:3001/api/users/me/wishlist';
+                            }
+
+                            try {
+                                const fetchOptions = {
+                                    method: method,
+                                    headers: {
+                                        'Authorization': `Bearer ${authToken}`
+                                    }
+                                };
+                                if (method === 'POST') {
+                                    fetchOptions.headers['Content-Type'] = 'application/json';
+                                    fetchOptions.body = JSON.stringify({ productId });
+                                }
+
+                                const response = await fetch(url, fetchOptions);
+
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                                }
+
+                                // --- Update UI and Local State on Success ---
+                                button.classList.toggle('active');
+                                if (isActive) { // Was active, now removing
+                                    icon.classList.remove('fas');
+                                    icon.classList.add('far');
+                                    userWishlist.delete(productId);
+                                    console.log(`Product ${productId} removed from wishlist`);
+                                } else { // Was inactive, now adding
+                                    icon.classList.remove('far');
+                                    icon.classList.add('fas');
+                                    userWishlist.add(productId);
+                                    console.log(`Product ${productId} added to wishlist`);
+                                }
+                                // Trigger animation ONLY when adding (optional)
+                                if (!isActive) {
+                                     icon.style.animation = 'none'; // Reset animation
+                                     // Trigger reflow to restart animation
+                                     void icon.offsetWidth;
+                                     icon.style.animation = 'heartJump 0.3s ease-in-out';
+                                }
+
+                            } catch (error) {
+                                console.error('Wishlist update failed:', error);
+                                alert(`Failed to update wishlist: ${error.message}`);
+                                // Optional: Revert UI changes on failure?
+                            }
+                        });
+                    });
+                     // --- End Wishlist Button Click Handler ---
+                }); 
+            });
+
+        });
+    </script>
+</body>
+</html> 

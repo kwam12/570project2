@@ -1,0 +1,41 @@
+<header>
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <div class="top-bar">
+        FREE SHIPPING ON DOMESTIC ORDERS $75+
+    </div>
+    <nav>
+        <div class="nav-left">
+            <button class="menu-toggle">☰</button>
+            <a href="/" class="logo">Nour</a> <!-- Link back to homepage -->
+            <ul>
+                <li><a href="/products.html?filter=new">NEW</a></li>
+                <li><a href="/products.html?filter=bestsellers">BEST SELLERS</a></li>
+            </ul>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="nav-center">
+            <form class="search-form" action="/search" method="get"> <!-- Example action -->
+                <input type="search" name="q" placeholder="Search..." class="search-input">
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+
+        <div class="nav-right">
+            <!-- Login Button -->
+            <a href="/login.html" id="login-link"><button class="nav-auth-btn">Login</button></a>
+            
+            <!-- Currency Dropdown Removed -->
+            
+            <!-- Country Flag Removed -->
+            
+            <a href="/account.html" id="profile-link">👤</a> <!-- Account Icon -->
+            <a href="/wishlist.html" id="navbar-wishlist-link" title="Wishlist"><i class="far fa-heart"></i></a> <!-- Wishlist Icon -->
+            <a href="/cart.html" class="nav-cart-link" title="Shopping Bag">
+                <i class="fas fa-shopping-bag"></i> <!-- Font Awesome Bag Icon -->
+                <span class="cart-item-count" id="cart-item-count">0</span> <!-- Counter Badge -->
+            </a>
+        </div>
+    </nav>
+</header> 
