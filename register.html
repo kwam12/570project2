@@ -73,6 +73,14 @@
         <h1>Register</h1>
         <form id="register-form">
             <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
             </div>
@@ -102,6 +110,8 @@
     <script type="module">
         document.addEventListener('DOMContentLoaded', () => {
             const registerForm = document.getElementById('register-form');
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
             const usernameInput = document.getElementById('username');
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
@@ -118,6 +128,8 @@
                 messageArea.textContent = '';
                 messageArea.className = 'message';
 
+                const firstName = firstNameInput.value;
+                const lastName = lastNameInput.value;
                 const username = usernameInput.value;
                 const email = emailInput.value;
                 const password = passwordInput.value;
@@ -131,7 +143,7 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ username, email, password })
+                        body: JSON.stringify({ firstName, lastName, username, email, password })
                     });
 
                     const data = await response.json();

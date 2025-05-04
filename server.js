@@ -413,13 +413,13 @@ app.post('/api/products', async (req, res) => {
 // Register a new user
 app.post('/api/auth/register', async (req, res) => {
   console.log("[Register Route] Received request"); // Log route entry
-  const { username, email, password } = req.body; // Add username
-  console.log("[Register Route] Received data:", { username, email, password: password ? '[PRESENT]' : '[MISSING]' }); // Log received data (hide actual password)
+  const { firstName, lastName, username, email, password } = req.body; // Add firstName, lastName
+  console.log("[Register Route] Received data:", { firstName, lastName, username, email, password: password ? '[PRESENT]' : '[MISSING]' }); // Log received data (hide actual password)
 
   // Validate input
-  if (!username || !email || !password) {
+  if (!firstName || !lastName || !username || !email || !password) { // Added firstName, lastName check
     console.log("[Register Route] Failed: Missing required fields"); // Log failure
-    return res.status(400).json({ message: 'Username, email, and password are required' });
+    return res.status(400).json({ message: 'All fields are required' }); // Updated message
   }
   // Add more validation (e.g., password length, username format) if needed
   
@@ -466,6 +466,8 @@ app.post('/api/auth/register', async (req, res) => {
 
     // Create and save user
     const newUser = new User({ 
+        firstName, // Added
+        lastName,  // Added
         username: username.toLowerCase(), // Save username
         email: email.toLowerCase(), 
         password: hashedPassword 
