@@ -55,6 +55,11 @@
             const loadingMessage = document.querySelector('.loading-message');
             const authToken = localStorage.getItem('authToken');
 
+            // --- Determine API Base URL using Vite Env Variable ---
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             // Function to create a product card (similar to products.html)
             function createProductCard(product) {
                 const productCard = document.createElement('div');
@@ -100,7 +105,8 @@
                          return;
                      }
                      try {
-                         const response = await fetch(`http://localhost:3001/api/users/me/wishlist/${productId}`, {
+                         // Use API_BASE_URL here
+                         const response = await fetch(`${API_BASE_URL}/api/users/me/wishlist/${productId}`, {
                              method: 'DELETE',
                              headers: { 'Authorization': `Bearer ${authToken}` }
                          });
@@ -133,7 +139,8 @@
 
                 try {
                     // 1. Fetch wishlist IDs
-                    const wishlistResponse = await fetch('http://localhost:3001/api/users/me/wishlist', {
+                    // Use API_BASE_URL here
+                    const wishlistResponse = await fetch(`${API_BASE_URL}/api/users/me/wishlist`, {
                         headers: { 'Authorization': `Bearer ${authToken}` }
                     });
                     if (!wishlistResponse.ok) throw new Error(`Failed to fetch wishlist IDs: ${wishlistResponse.status}`);
@@ -148,7 +155,8 @@
                     // 2. Fetch product details for each ID (can be slow for large lists)
                     // Consider a batch endpoint later if performance is an issue
                     const productPromises = wishlistIds.map(id => 
-                        fetch(`http://localhost:3001/api/products/${id}`).then(res => {
+                        // Use API_BASE_URL here
+                        fetch(`${API_BASE_URL}/api/products/${id}`).then(res => {
                             if (!res.ok) {
                                 console.error(`Failed to fetch product ${id}: ${res.status}`);
                                 return null; // Handle failed fetches gracefully

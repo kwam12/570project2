@@ -204,6 +204,11 @@
             const userLoyaltyPointsSpan = document.getElementById('user-loyalty-points'); // Get loyalty points container
             const promotionsListDiv = document.getElementById('promotions-list'); // Get promotions list container
 
+            // --- Determine API Base URL using Vite Env Variable ---
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             // Function to format date nicely
             function formatDate(dateString) {
                 if (!dateString) return 'N/A';
@@ -220,7 +225,7 @@
                  if (!userEmailSpan) return;
                  
                 try {
-                    const response = await fetch('http://localhost:3001/api/users/me', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/me`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}` // Send token in header
@@ -257,7 +262,7 @@
                 if (!userLoyaltyPointsSpan || !token) return;
                 
                 try {
-                    const response = await fetch('http://localhost:3001/api/users/me/loyalty', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/me/loyalty`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (!response.ok) {
@@ -281,7 +286,7 @@
                 orderHistoryList.innerHTML = '<p>Loading order history...</p>'; // Show loading message
 
                 try {
-                   const response = await fetch('http://localhost:3001/api/users/me/orders', {
+                   const response = await fetch(`${API_BASE_URL}/api/users/me/orders`, {
                        headers: { 'Authorization': `Bearer ${token}` }
                    });
 
@@ -356,7 +361,7 @@
                 promotionsListDiv.innerHTML = '<p>Loading offers...</p>';
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/users/me/promotions', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/me/promotions`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (!response.ok) {

@@ -322,6 +322,11 @@
             const applyPromoBtn = document.getElementById('apply-promo-btn');
             const promoMessageP = document.getElementById('promo-message');
 
+            // --- Determine API Base URL using Vite Env Variable ---
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             let checkoutCart = null;
             let currentSubTotal = 0;
             let appliedPromotion = null;
@@ -394,7 +399,7 @@
                 }
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/apply-promotion', {
+                    const response = await fetch(`${API_BASE_URL}/api/apply-promotion`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -497,7 +502,7 @@
 
                 // --- Implement the actual fetch call to POST /api/checkout ---
                 try {
-                    const response = await fetch('http://localhost:3001/api/checkout', {
+                    const response = await fetch(`${API_BASE_URL}/api/checkout`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

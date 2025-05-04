@@ -386,6 +386,11 @@
             const submitFeedbackBtn = document.getElementById('submit-feedback-btn'); // Submit button
             const feedbackMessageP = document.getElementById('feedback-message'); // Status message paragraph
 
+            // --- Determine API Base URL using Vite Env Variable ---
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             let currentProduct = null;
             let selectedSize = null;
             let selectedColor = null;
@@ -414,7 +419,7 @@
             async function fetchWishlist() {
                 if (!authToken) return; 
                 try {
-                    const response = await fetch('http://localhost:3001/api/users/me/wishlist', { headers: { 'Authorization': `Bearer ${authToken}` } });
+                    const response = await fetch(`${API_BASE_URL}/api/users/me/wishlist`, { headers: { 'Authorization': `Bearer ${authToken}` } });
                     if (!response.ok) {
                         if (response.status !== 401) throw new Error(`HTTP error! status: ${response.status}`);
                         return; 
@@ -498,8 +503,8 @@
                     const recProductId = recWishlistBtn.dataset.productId;
                     const recIsActive = recWishlistBtn.classList.contains('active');
                     let method, url;
-                    if (recIsActive) { method = 'DELETE'; url = `http://localhost:3001/api/users/me/wishlist/${recProductId}`; }
-                    else { method = 'POST'; url = 'http://localhost:3001/api/users/me/wishlist'; }
+                    if (recIsActive) { method = 'DELETE'; url = `${API_BASE_URL}/api/users/me/wishlist/${recProductId}`; }
+                    else { method = 'POST'; url = `${API_BASE_URL}/api/users/me/wishlist`; }
                     
                     try {
                          const fetchOptions = { method: method, headers: { 'Authorization': `Bearer ${authToken}` } };
@@ -529,7 +534,7 @@
                      return;
                  }
                  try {
-                     const response = await fetch(`http://localhost:3001/api/products?category=${encodeURIComponent(category)}`);
+                     const response = await fetch(`${API_BASE_URL}/api/products?category=${encodeURIComponent(category)}`);
                      if (!response.ok) {
                          throw new Error(`HTTP error! status: ${response.status}`);
                      }
@@ -570,7 +575,7 @@
                 try {
                     await fetchWishlist();
                     
-                    const response = await fetch(`http://localhost:3001/api/products/${productId}`);
+                    const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -670,7 +675,7 @@
                             };
 
                             try {
-                                const response = await fetch('http://localhost:3001/api/feedback', {
+                                const response = await fetch(`${API_BASE_URL}/api/feedback`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
@@ -762,8 +767,8 @@
                 const productId = currentProduct._id;
                 const isActive = wishlistBtn.classList.contains('active');
                 let method, url;
-                 if (isActive) { method = 'DELETE'; url = `http://localhost:3001/api/users/me/wishlist/${productId}`; } 
-                 else { method = 'POST'; url = 'http://localhost:3001/api/users/me/wishlist'; }
+                 if (isActive) { method = 'DELETE'; url = `${API_BASE_URL}/api/users/me/wishlist/${productId}`; } 
+                 else { method = 'POST'; url = `${API_BASE_URL}/api/users/me/wishlist`; }
 
                  try {
                      const fetchOptions = { method: method, headers: { 'Authorization': `Bearer ${authToken}` } };

@@ -107,6 +107,11 @@
             const passwordInput = document.getElementById('password');
             const messageArea = document.getElementById('message-area');
 
+            // --- Determine API Base URL using Vite Env Variable ---
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             registerForm.addEventListener('submit', async (event) => {
                 event.preventDefault(); 
                 messageArea.style.display = 'none';
@@ -120,7 +125,8 @@
                 // Add basic password validation if desired (e.g., length)
 
                 try {
-                    const response = await fetch('http://localhost:3001/api/auth/register', {
+                    // Use API_BASE_URL here
+                    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

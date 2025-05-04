@@ -103,6 +103,11 @@
             const activeFiltersContainer = document.querySelector('.active-filters'); // Get active filters container
             const itemCountSpan = document.querySelector('.item-count');
 
+            // --- Determine API Base URL using Vite Env Variable ---            
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+            console.log(`Using API Base URL: ${API_BASE_URL}`); // Log for debugging
+            // --- End Determine API Base URL ---
+
             // Store current filter/sort state
             let currentSort = '';
             let currentCategory = '';
@@ -117,7 +122,7 @@
             async function fetchWishlist() {
                 if (!authToken) return; // Don't fetch if not logged in
                 try {
-                    const response = await fetch('http://localhost:3001/api/users/me/wishlist', {
+                    const response = await fetch(`${API_BASE_URL}/api/users/me/wishlist`, {
                         headers: {
                             'Authorization': `Bearer ${authToken}`
                         }
@@ -163,13 +168,13 @@
                 if (loadingMessage) productGrid.appendChild(loadingMessage);
                 if (itemCountSpan) itemCountSpan.textContent = '';
                 try {
-                    let apiUrl = 'http://localhost:3001/api/products'; // Default API endpoint
+                    let apiEndpoint = '/api/products'; // Default relative endpoint
                     const params = new URLSearchParams();
 
                     // Check if there is a search query
                     if (searchQuery) {
-                        apiUrl = 'http://localhost:3001/api/search'; // Use search endpoint
-                        params.set('q', searchQuery); 
+                        apiEndpoint = '/api/search'; // Use search endpoint
+                        params.set('q', searchQuery);
                         // When searching, usually other filters are ignored, adjust if needed
                         // Maybe disable filter controls or clear other filter states?
                     } else {
@@ -183,9 +188,9 @@
                     }
                     
                     const queryString = params.toString();
-                    apiUrl = `${apiUrl}${queryString ? '?' + queryString : ''}`;
+                    const fullApiUrl = `${API_BASE_URL}${apiEndpoint}${queryString ? '?' + queryString : ''}`;
 
-                    const response = await fetch(apiUrl);
+                    const response = await fetch(fullApiUrl);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -378,11 +383,11 @@
                             if (isActive) {
                                 // Remove from wishlist
                                 method = 'DELETE';
-                                url = `http://localhost:3001/api/users/me/wishlist/${productId}`;
+                                url = `${API_BASE_URL}/api/users/me/wishlist/${productId}`;
                             } else {
                                 // Add to wishlist
                                 method = 'POST';
-                                url = 'http://localhost:3001/api/users/me/wishlist';
+                                url = `${API_BASE_URL}/api/users/me/wishlist`;
                             }
 
                             try {
