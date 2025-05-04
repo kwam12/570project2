@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Load the reusable header and THEN set up listeners and check auth state
-    loadHTML('#header-placeholder', '/_header.html').then(() => {
+    loadHTML('#header-placeholder', '/header.html').then(() => {
         const currencySelect = document.querySelector('#header-placeholder .currency-select');
         const profileLink = document.querySelector('#header-placeholder #profile-link');
         const loginLink = document.querySelector('#header-placeholder #login-link');
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Load the reusable footer
-    loadHTML('#footer-placeholder', '/_footer.html');
+    loadHTML('#footer-placeholder', '/footer.html');
 
     // --- Other potential JavaScript code --- 
     console.log("Skims Clone Loaded");
