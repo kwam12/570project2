@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Successful! - Nour</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Link Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <!-- Link your main stylesheet -->
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* Add specific styles for this page if needed */
+        .success-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .success-container h1 {
+            color: #28a745; /* Green for success */
+            margin-bottom: 20px;
+        }
+        .success-container p {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .success-container a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .success-container a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+
+    <div class="success-container">
+        <h1>Thank You for Your Order!</h1>
+        <p>Your payment was successful, and your order is being processed.</p>
+        <p>You can view your order details in your <a href="/account.html">account history</a>.</p>
+        <!-- Order details could potentially be loaded here -->
+        <p id="order-details-placeholder"></p> 
+        <a href="/">Continue Shopping</a>
+    </div>
+
+    <!-- Load main script for header/shared logic -->
+    <script type="module" src="/main.js"></script> 
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Order success page loaded.');
+
+            // --- Clear the Cart --- 
+            localStorage.removeItem('shoppingCart');
+            console.log('Shopping cart cleared from localStorage.');
+
+            // Dispatch cart updated event so header icon updates (if applicable)
+            // Ensure your main.js listens for this event to update the header
+            document.dispatchEvent(new CustomEvent('cartUpdated'));
+
+            // --- Optional: Use session_id --- 
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('session_id');
+
+            if (sessionId) {
+                console.log('Stripe Checkout Session ID:', sessionId);
+                // If needed, you could display the session ID or use it to fetch details
+                // const detailsPlaceholder = document.getElementById('order-details-placeholder');
+                // detailsPlaceholder.textContent = `(Ref: ${sessionId.substring(0, 10)}...)`;
+            } else {
+                console.warn('No session_id found in URL.');
+            }
+        });
+    </script>
+</body>
+</html> 

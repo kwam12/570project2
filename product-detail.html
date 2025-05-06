@@ -731,14 +731,16 @@
                     alert("Please select color and size.");
                     return;
                 }
+                console.log("[Add to Bag] Current product state:", JSON.stringify(currentProduct, null, 2)); // Log currentProduct
+                const selectedQuantity = quantitySelect ? parseInt(quantitySelect.value) : 1;
                 const itemToAdd = {
-                    id: currentProduct._id,
+                    id: currentProduct.id,
                     name: currentProduct.name,
                     price: currentProduct.price,
                     image: currentProduct.image,
                     color: selectedColor,
                     size: selectedSize,
-                    quantity: parseInt(quantitySelect.value, 10)
+                    quantity: selectedQuantity
                 };
                 console.log("Adding to bag:", itemToAdd);
                 let cart = JSON.parse(localStorage.getItem('shoppingCart')) || [];

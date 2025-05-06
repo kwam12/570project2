@@ -233,7 +233,7 @@
                         if (product.isBestSeller) tagsHTML += '<span class="product-tag best-seller">Best seller</span>';
                         if (product.matchingSet) tagsHTML += '<span class="product-tag matching-set">Matching set</span>';
 
-                        const productId = product._id;
+                        const productId = product.id;
 
                         // --- Star Rating Display --- 
                         let ratingHTML = '<div class="product-rating-placeholder"></div>'; // Placeholder if no rating

@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <!-- Link the existing stylesheet -->
     <link rel="stylesheet" href="style.css">
+    <!-- Stripe.js Script -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <!-- End Stripe.js Script -->
     <style>
         /* Specific styles for Shipping Page */
         .shipping-page-main {
@@ -31,7 +34,16 @@
             gap: 40px;
         }
 
-        .shipping-form-section h2, .cart-summary-section h2 {
+        /* Style for shipping form section header removed */
+        /* .shipping-form-section h2, .cart-summary-section h2 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: normal;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        } */
+        /* KEEPING .cart-summary-section h2 (re-add if needed separately) */
+         .cart-summary-section h2 {
             font-size: 1.3em;
             margin-bottom: 20px;
             font-weight: normal;
@@ -39,47 +51,76 @@
             padding-bottom: 10px;
         }
 
+        /* --- NEW Shipping Form Styles --- */
+        .shipping-form-section h2 {
+            font-size: 1.4em; /* Make heading slightly larger */
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd; /* Slightly darker border */
+            font-weight: 600; /* Bolder */
+        }
+
         .shipping-form label {
-            display: block;
-            margin-bottom: 5px;
+            display: block; /* Each label on its own line */
+            margin-bottom: 8px; /* Space below label */
+            font-weight: 500; /* Slightly bolder label text */
             font-size: 0.9em;
-            color: #555;
+            color: #444; /* Darker label color */
         }
 
         .shipping-form input[type="text"],
-        .shipping-form input[type="email"], /* If needed */
         .shipping-form select {
+            display: block; /* Ensure they take full block width */
             width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 0.9em;
+            padding: 12px; /* More padding */
+            margin-bottom: 18px; /* More space below input */
+            border: 1px solid #ccc; /* Standard border */
+            border-radius: 5px; /* Slightly more rounded corners */
+            font-size: 1em;
+            box-sizing: border-box; /* Include padding/border in width */
+        }
+         .shipping-form select {
+            appearance: none; /* Remove default dropdown arrow for custom styling later if needed */
+            background-color: #fff; /* Ensure background is white */
+        }
+
+        .shipping-form input[type="text"]:focus,
+        .shipping-form select:focus {
+            border-color: #555; /* Darker border on focus */
+            outline: none; /* Remove default blue outline */
+            box-shadow: 0 0 0 2px rgba(50, 50, 50, 0.1); /* Subtle focus ring */
         }
 
         .shipping-form button {
             display: block;
             width: 100%;
-            padding: 15px;
-            background-color: #000;
-            color: #fff;
+            padding: 14px 20px;
+            background-color: #1a1a1a; /* Dark button */
+            color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 1em;
-            font-weight: bold;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-transform: uppercase; /* Uppercase text */
+            letter-spacing: 0.5px;
             cursor: pointer;
-            text-align: center;
-            margin-top: 20px;
-            transition: background-color 0.2s ease;
+            margin-top: 25px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
         }
+
         .shipping-form button:hover {
             background-color: #333;
         }
-        .shipping-form button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+         .shipping-form button:active {
+             transform: scale(0.98); /* Slight shrink on click */
         }
 
+        .shipping-form button:disabled {
+            background-color: #b0b0b0; /* Grey out when disabled */
+            cursor: not-allowed;
+        }
+        /* --- END NEW Shipping Form Styles --- */
 
         /* Cart Summary Styles (reuse/adapt from cart.html if possible) */
         .cart-summary-section {
@@ -211,6 +252,133 @@
              border-top: 1px solid #eee;
          }
 
+        /* --- Delivery Form Styles --- */
+        .delivery-form-section h2 {
+            font-size: 1.6em;
+            color: #222;
+            margin-bottom: 25px;
+            font-weight: 600;
+            border: none; /* Remove border from previous style */
+            padding: 0;
+        }
+
+        .form-group {
+            margin-bottom: 16px; /* Space between form groups */
+        }
+
+        .delivery-form-section label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.8em; /* Smaller label */
+            color: #666; /* Lighter label color */
+            text-transform: none; /* Override potential global uppercase */
+            font-weight: normal;
+        }
+
+        .delivery-form-section input[type="text"],
+        .delivery-form-section select {
+            display: block;
+            width: 100%;
+            padding: 10px 12px; /* Adjust padding */
+            border: 1px solid #d0d0d0; /* Slightly lighter border */
+            border-radius: 4px;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+        
+         .delivery-form-section input[type="text"]:focus,
+         .delivery-form-section select:focus {
+            border-color: #888; /* Adjust focus color */
+            outline: none;
+            box-shadow: 0 0 0 1px rgba(100, 100, 100, 0.1); /* Adjust focus shadow */
+        }
+        
+        .delivery-form-section select {
+             background-color: #fff;
+             /* Consider adding a background arrow image for custom select */
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px; /* Space between side-by-side inputs */
+        }
+
+        .form-group-half {
+            flex: 1 1 50%; /* Allow two items per row */
+        }
+
+        .form-group-third {
+             flex: 1 1 33%; /* Allow three items per row */
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .form-checkbox input[type="checkbox"] {
+            width: auto; /* Override default width */
+            margin-right: 10px;
+            accent-color: #333; /* Style the check color */
+        }
+
+        .form-checkbox label {
+            margin-bottom: 0; /* Remove bottom margin for inline alignment */
+            font-size: 0.9em;
+            color: #333;
+        }
+        
+        #continue-shipping-btn {
+            /* display: block; */ /* Replaced by flex */
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space out text and price */
+            align-items: center; /* Vertically center items */
+            width: 100%;
+            padding: 14px 20px; /* Adjust padding as needed */
+            /* background-color: #282828; */ /* Old color */
+            background-color: #54588E; /* Purple color from image */
+            color: white;
+            border: none;
+            border-radius: 6px; /* Slightly more rounded */
+            font-size: 1.05em; /* Adjust font size */
+            font-weight: 600; /* Bolder font */
+            text-transform: none; /* Override uppercase if previously set */
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .button-text {
+            /* Specific styles for text if needed */
+        }
+         .button-price {
+            font-weight: 600; /* Match text boldness */
+            /* Potentially add some left margin if needed: margin-left: 15px; */
+        }
+
+         #continue-shipping-btn:hover {
+            background-color: #44477A; /* Darker shade of purple */
+        }
+        
+        .payment-icons {
+            text-align: center;
+            margin-top: 15px;
+        }
+         .payment-icons .icon-placeholder {
+             font-size: 0.8em;
+             color: #888;
+             /* Replace this span with actual <img> or SVG icons */
+             /* Style actual icons with display: inline-block, height, margin etc. */
+        }
+         .payment-icons img {
+             height: 20px; /* Adjust height as needed */
+             margin: 0 4px; /* Add spacing between icons */
+             vertical-align: middle; /* Align nicely with text if any */
+        }
+
+        /* Style for shipping form label removed */
+
     </style>
 </head>
 <body>
@@ -220,52 +388,134 @@
         <h1>Shipping Information</h1>
 
         <div class="shipping-layout">
-            <!-- Left Column: Shipping Form -->
-            <div class="shipping-form-section">
-                <h2>Shipping Address</h2>
-                <form id="shipping-form">
-                    <div>
-                        <label for="fullName">Full Name</label>
-                        <input type="text" id="fullName" name="fullName" required>
+            <!-- Left Column: Delivery Form -->
+            <div class="delivery-form-section">
+                <h2>Delivery</h2>
+                <form id="delivery-form">
+                    <div class="form-group">
+                        <label for="country">Country/Region</label>
+                        <select id="country" name="country" required>
+                            <option value="US" selected>United States</option>
+                            <option value="CA">Canada</option>
+                            <!-- Add more countries -->
+                        </select>
                     </div>
-                    <div>
-                        <label for="streetAddress">Street Address</label>
-                        <input type="text" id="streetAddress" name="streetAddress" required>
+
+                    <div class="form-row">
+                        <div class="form-group form-group-half">
+                            <label for="firstName">First name</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group form-group-half">
+                            <label for="lastName">Last name</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
                     </div>
-                     <div>
-                        <label for="aptSuite">Apartment, suite, etc. (Optional)</label>
+
+                    <div class="form-group">
+                        <label for="company">Company (required for business addresses)</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label> 
+                        <input type="text" id="address" name="address" required> 
+                        <!-- Icon would typically be added via CSS background or pseudo-element -->
+                    </div>
+
+                    <div class="form-group">
+                        <label for="aptSuite">Apartment, suite, etc. (optional)</label>
                         <input type="text" id="aptSuite" name="aptSuite">
                     </div>
-                    <div>
+
+                    <div class="form-row">
+                        <div class="form-group form-group-third">
                         <label for="city">City</label>
                         <input type="text" id="city" name="city" required>
                     </div>
-                    <div>
-                        <label for="country">Country</label>
-                        <select id="country" name="country" required>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <!-- Add more countries as needed -->
+                        <div class="form-group form-group-third">
+                            <label for="state">State</label>
+                            <select id="state" name="state" required>
+                                <option value="" disabled selected>Select State</option>
+                                <option value="AL">Alabama</option>
+                                <option value="AK">Alaska</option>
+                                <option value="AZ">Arizona</option>
+                                <option value="AR">Arkansas</option>
+                                <option value="CA">California</option>
+                                <option value="CO">Colorado</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="DE">Delaware</option>
+                                <option value="DC">District Of Columbia</option>
+                                <option value="FL">Florida</option>
+                                <option value="GA">Georgia</option>
+                                <option value="HI">Hawaii</option>
+                                <option value="ID">Idaho</option>
+                                <option value="IL">Illinois</option>
+                                <option value="IN">Indiana</option>
+                                <option value="IA">Iowa</option>
+                                <option value="KS">Kansas</option>
+                                <option value="KY">Kentucky</option>
+                                <option value="LA">Louisiana</option>
+                                <option value="ME">Maine</option>
+                                <option value="MD">Maryland</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="MI">Michigan</option>
+                                <option value="MN">Minnesota</option>
+                                <option value="MS">Mississippi</option>
+                                <option value="MO">Missouri</option>
+                                <option value="MT">Montana</option>
+                                <option value="NE">Nebraska</option>
+                                <option value="NV">Nevada</option>
+                                <option value="NH">New Hampshire</option>
+                                <option value="NJ">New Jersey</option>
+                                <option value="NM">New Mexico</option>
+                                <option value="NY">New York</option>
+                                <option value="NC">North Carolina</option>
+                                <option value="ND">North Dakota</option>
+                                <option value="OH">Ohio</option>
+                                <option value="OK">Oklahoma</option>
+                                <option value="OR">Oregon</option>
+                                <option value="PA">Pennsylvania</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="SC">South Carolina</option>
+                                <option value="SD">South Dakota</option>
+                                <option value="TN">Tennessee</option>
+                                <option value="TX">Texas</option>
+                                <option value="UT">Utah</option>
+                                <option value="VT">Vermont</option>
+                                <option value="VA">Virginia</option>
+                                <option value="WA">Washington</option>
+                                <option value="WV">West Virginia</option>
+                                <option value="WI">Wisconsin</option>
+                                <option value="WY">Wyoming</option>
+                                <!-- Add territories if needed -->
                         </select>
                     </div>
-                     <div>
-                        <label for="state">State / Province</label>
-                        <input type="text" id="state" name="state" required>
-                         <!-- Consider using a dropdown for US states -->
-                    </div>
-                    <div>
-                        <label for="postalCode">Postal Code</label>
-                        <input type="text" id="postalCode" name="postalCode" required>
-                    </div>
-                     <div>
-                        <label for="phone">Phone (Optional)</label>
-                        <input type="text" id="phone" name="phone">
+                        <div class="form-group form-group-third">
+                            <label for="zipCode">ZIP code</label>
+                            <input type="text" id="zipCode" name="zipCode" required>
+                        </div>
                     </div>
 
-                    <button type="submit" id="place-order-btn">PLACE ORDER</button>
-                    <p id="form-error" class="error-message" style="display: none;"></p>
+                    <div class="form-group form-checkbox">
+                        <input type="checkbox" id="textOffers" name="textOffers">
+                        <label for="textOffers">Text me with news and offers</label>
+                    </div>
+
+                    <button type="submit" id="continue-shipping-btn">
+                        <span class="button-text">Checkout with Stripe</span>
+                        <span class="button-price" id="button-price">$0.00</span> <!-- Price placeholder -->
+                    </button>
+                    <div class="payment-icons">
+                        <img src="/assets/bankicons/visa-icon-2048x1313-o6hi8q5l.png" alt="Visa">
+                        <img src="/assets/bankicons/mastercard-icon-2048x1587-tygju446.png" alt="Mastercard">
+                        <img src="/assets/bankicons/349228.png" alt="American Express"> 
+                        <img src="/assets/bankicons/discover-icon-2048x1313-4euh7fjo.png" alt="Discover">
+                    </div>
+                     <p id="delivery-form-error" class="error-message" style="display: none;"></p> 
                 </form>
             </div>
+            <!-- REMOVED: Shipping Form Section -->
 
             <!-- Right Column: Summary -->
             <div class="cart-summary-section">
@@ -312,9 +562,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             const summaryItemsList = document.getElementById('summary-items-list');
             const summaryTotalSpan = document.getElementById('summary-total');
-            const shippingForm = document.getElementById('shipping-form');
+            const shippingForm = document.getElementById('delivery-form');
             const placeOrderBtn = document.getElementById('place-order-btn');
-            const formErrorP = document.getElementById('form-error');
+            const formErrorP = document.getElementById('delivery-form-error');
             const summarySubtotalSpan = document.getElementById('summary-subtotal');
             const summaryDiscountDiv = document.querySelector('.summary-discount');
             const summaryDiscountAmountSpan = document.getElementById('summary-discount-amount');
@@ -454,90 +704,120 @@
 
                  summarySubtotalSpan.textContent = formatPrice(currentSubTotal);
                  summaryTotalSpan.textContent = formatPrice(finalTotal);
+                 
+                 // Update button price dynamically
+                 const buttonPriceSpan = document.getElementById('button-price');
+                 if (buttonPriceSpan) {
+                     buttonPriceSpan.textContent = formatPrice(finalTotal);
+                 }
             }
 
-            // --- Handle Form Submission ---
-            shippingForm.addEventListener('submit', async (event) => {
-                event.preventDefault(); // Prevent default page reload
-                placeOrderBtn.disabled = true;
-                placeOrderBtn.textContent = 'PLACING ORDER...';
-                formErrorP.style.display = 'none'; // Hide previous errors
+            // --- Handle Form Submission (Now Stripe Checkout) ---
+            const stripeCheckoutButton = document.getElementById('continue-shipping-btn');
+            stripeCheckoutButton.addEventListener('click', async (event) => {
+                event.preventDefault(); // Prevent default button/form action
+                
+                // Optional: Basic validation for form fields before proceeding?
+                const formData = new FormData(shippingForm);
+                const requiredFields = ['country', 'firstName', 'lastName', 'address', 'city', 'state', 'zipCode'];
+                let formIsValid = true;
+                for (const field of requiredFields) {
+                    if (!formData.get(field)) {
+                        formIsValid = false;
+                        break;
+                    }
+                }
+                if (!formIsValid) {
+                     formErrorP.textContent = 'Please fill in all required delivery address fields before proceeding to checkout.';
+                     formErrorP.style.display = 'block';
+                     // Optionally scroll to the error message or highlight fields
+                     return; // Stop if form is invalid
+                }
+                formErrorP.style.display = 'none'; // Hide error if valid
+
+                // --- Start Stripe Checkout --- 
+                stripeCheckoutButton.disabled = true;
+                stripeCheckoutButton.querySelector('.button-text').textContent = 'Processing...'; // Update text part
 
                 const authToken = localStorage.getItem('authToken');
                 if (!authToken) {
                     alert('Authentication token not found. Please log in again.');
                     window.location.href = '/login.html';
-                    return;
+                    return; // Stop
                 }
-                
-                // Basic validation
-                const formData = new FormData(shippingForm);
-                const shippingAddress = {
-                    fullName: formData.get('fullName'),
-                    streetAddress: formData.get('streetAddress'),
-                    aptSuite: formData.get('aptSuite') || '', // Optional
-                    city: formData.get('city'),
-                    state: formData.get('state'),
-                    postalCode: formData.get('postalCode'),
-                    country: formData.get('country'),
-                    phone: formData.get('phone') || '' // Optional
-                };
 
-                if (!shippingAddress.fullName || !shippingAddress.streetAddress || !shippingAddress.city || !shippingAddress.state || !shippingAddress.postalCode || !shippingAddress.country) {
-                     formErrorP.textContent = 'Please fill in all required address fields.';
+                if (!checkoutCart || checkoutCart.length === 0) {
+                     formErrorP.textContent = 'Cannot proceed to checkout, your cart seems empty.';
                      formErrorP.style.display = 'block';
-                     placeOrderBtn.disabled = false;
-                     placeOrderBtn.textContent = 'PLACE ORDER';
-                    return;
+                     stripeCheckoutButton.disabled = false;
+                     stripeCheckoutButton.querySelector('.button-text').textContent = 'Checkout with Stripe';
+                    return; // Stop if cart is empty
                 }
 
-                const orderData = {
-                    cart: checkoutCart,
-                    shippingAddress: shippingAddress,
-                    appliedPromoCode: appliedPromotion ? appliedPromotion.code : null
-                };
+                console.log("[Shipping Page] Cart being sent to backend:", JSON.stringify(checkoutCart, null, 2)); // Log the cart
 
-                console.log('--- Order Data to Send ---');
-                console.log(JSON.stringify(orderData, null, 2));
-
-                // --- Implement the actual fetch call to POST /api/checkout ---
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/checkout`, {
+                    // Call the backend to create a checkout session
+                    const shippingAddress = {
+                        country: formData.get('country'),
+                        firstName: formData.get('firstName'),
+                        lastName: formData.get('lastName'),
+                        address: formData.get('address'),
+                        city: formData.get('city'),
+                        state: formData.get('state'),
+                        zipCode: formData.get('zipCode')
+                    };
+
+                    const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${authToken}`
                         },
-                        body: JSON.stringify(orderData)
+                        body: JSON.stringify({ 
+                            cart: checkoutCart, 
+                            deliveryAddress: shippingAddress,
+                            appliedPromoCode: appliedPromotion ? appliedPromotion.code : null
+                        }) 
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json();
-                        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                        throw new Error(errorData.message || `Failed to create session (HTTP ${response.status})`);
                     }
 
-                    const result = await response.json();
-                    console.log('Order placed successfully:', result);
+                    const sessionData = await response.json();
+                    
+                    // Redirect to Stripe Checkout using Stripe.js
+                    console.log('Redirecting to Stripe Checkout with session ID:', sessionData.sessionId);
+                    // window.location.href = `https://checkout.stripe.com/pay/${sessionData.sessionId}`; // Basic redirect (replaced)
 
-                    // Clear carts
-                    localStorage.removeItem('shoppingCart');
-                    sessionStorage.removeItem('checkoutCart');
-
-                    // Dispatch event to update header icon
-                    document.dispatchEvent(new CustomEvent('cartUpdated')); 
-
-                    // Redirect to account page or order confirmation page
-                    alert('Order placed successfully!');
-                    window.location.href = '/account.html'; 
+                    // Use Stripe.js library (RECOMMENDED): 
+                    const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+                    if (!stripePublishableKey) {
+                        console.error('Stripe Publishable Key is not set. Make sure VITE_STRIPE_PUBLISHABLE_KEY is in your .env file and the dev server was restarted.');
+                        throw new Error('Stripe configuration error.');
+                    }
+                    const stripe = Stripe(stripePublishableKey);
+                    
+                    // Use Stripe.js library (RECOMMENDED): 
+                    const { error } = await stripe.redirectToCheckout({
+                        sessionId: sessionData.sessionId
+                    });
+                    // If `redirectToCheckout` fails due to an error, it will be displayed here
+                    if (error) {
+                        console.error('Stripe redirection error:', error);
+                        throw new Error(`Checkout failed: ${error.message}`); // Throw error to be caught below
+                    }
 
                 } catch (error) {
-                    console.error('Checkout failed:', error);
-                    formErrorP.textContent = `Checkout failed: ${error.message}`;
+                    console.error('Stripe Checkout initiation failed:', error);
+                    formErrorP.textContent = `Checkout initiation failed: ${error.message}`;
                     formErrorP.style.display = 'block';
-                } finally {
-                     placeOrderBtn.disabled = false;
-                     placeOrderBtn.textContent = 'PLACE ORDER';
+                    stripeCheckoutButton.disabled = false;
+                     stripeCheckoutButton.querySelector('.button-text').textContent = 'Checkout with Stripe';
                 }
+                // --- End Stripe Checkout ---
             });
 
         });

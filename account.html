@@ -131,6 +131,38 @@
               color: #777;
          }
 
+        /* Personalized Offers Section Styles */
+        .personalized-offers-section {
+             margin-top: 40px;
+             border-top: 1px solid #eee;
+             padding-top: 30px;
+        }
+         .personalized-offers-section h2 {
+             margin-bottom: 20px;
+             font-weight: normal;
+         }
+        .personalized-offer {
+             background-color: #f9f9f9;
+             border: 1px solid #eee;
+             border-left: 4px solid #007bff; /* Accent color */
+             padding: 15px;
+             margin-bottom: 15px;
+             border-radius: 4px;
+         }
+        .personalized-offer strong { /* Promo Code */
+            font-family: monospace;
+            font-size: 1.1em;
+            color: #0056b3;
+        }
+        .personalized-offer p { /* Description */
+             margin-top: 5px;
+             font-size: 0.9em;
+             color: #555;
+         }
+         .no-personalized-offers-message {
+              color: #777;
+         }
+
     </style>
 </head>
 <body>
@@ -165,6 +197,16 @@
         </div>
     </div>
     <!-- End Promotions Section -->
+
+    <!-- Personalized Offers Section (NEW) -->
+    <div class="account-container personalized-offers-section">
+        <h2>Just For You</h2>
+        <div id="personalized-offers-list">
+            <p>Checking for special offers...</p>
+            <!-- Personalized offers will be loaded here -->
+        </div>
+    </div>
+    <!-- End Personalized Offers Section -->
 
     <!-- Link the main JavaScript file -->
     <script type="module" src="/main.js"></script>
@@ -203,6 +245,7 @@
             const orderHistoryList = document.getElementById('order-history-list'); // Get order list container
             const userLoyaltyPointsSpan = document.getElementById('user-loyalty-points'); // Get loyalty points container
             const promotionsListDiv = document.getElementById('promotions-list'); // Get promotions list container
+            const personalizedOffersListDiv = document.getElementById('personalized-offers-list'); // NEW: Get personalized offers container
 
             // --- Determine API Base URL using Vite Env Variable ---
             const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
@@ -315,16 +358,18 @@
                         
                         let itemsHTML = '';
                         order.items.forEach(item => {
-                            // Access the populated product image via item.productId
-                            const itemImage = (item.productId && item.productId.image) ? item.productId.image : '/assets/placeholder.png'; 
+                            // Access the populated product image and name via item.product
+                            // Fallback to placeholder if image isn't populated or missing
+                            const productData = item.product || {}; // Handle cases where product might not be populated (though it should be)
+                            const itemImage = productData.image ? productData.image : '/assets/placeholder.png'; 
+                            const itemName = productData.name || item.name; // Prefer populated name, fallback to stored name
                             
                             itemsHTML += `
                                <div class="order-item">
-                                   <img src="${itemImage}" alt="${item.name}">
+                                   
                                    <div class="order-item-details">
-                                        <strong>${item.name}</strong>
-                                        ${item.size && item.size !== 'N/A' ? `<span>Size: ${item.size}</span>` : ''}
-                                        ${item.color && item.color !== 'N/A' ? `<span>Color: ${item.color}</span>` : ''}
+                                        <strong>${item.name}</strong> <!-- Display name at time of order -->
+                                        <!-- Size and Color are not stored in OrderItem, removed -->
                                         <span>Qty: ${item.quantity}</span>
                                    </div>
                                     <div class="order-item-price">
@@ -337,7 +382,7 @@
                         orderCard.innerHTML = `
                             <div class="order-card-header">
                                 <span>Order Date: <strong>${formatDate(order.orderDate)}</strong></span>
-                                <span>Order ID: <strong>${order._id}</strong></span> 
+                                <span>Order ID: <strong>${order.id}</strong></span>
                                 <span>Total: <strong>${formatPrice(order.totalAmount)}</strong></span>
                             </div>
                             ${itemsHTML}
@@ -394,6 +439,58 @@
             }
             fetchPromotions(); // Fetch promotions on page load
             // --- End Fetch Available Promotions ---
+
+            // --- Fetch Personalized Offers (NEW) ---
+            async function fetchPersonalizedOffers() {
+                if (!personalizedOffersListDiv || !token) return;
+                
+                personalizedOffersListDiv.innerHTML = '<p>Checking for special offers...</p>';
+
+                try {
+                    // Construct the URL
+                    const apiUrl = `${API_BASE_URL}/api/users/me/personalized-offers`; 
+                    console.log(`[Personalized Offers Fetch] Fetching from: ${apiUrl}`); // Added console log for debugging
+
+                    const response = await fetch(apiUrl, { // Use the constructed URL
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) {
+                         // Don't redirect, main auth checks should handle it
+                         if (response.status === 401) {
+                             console.warn('[Personalized Offers Fetch] Unauthorized.');
+                         } else {
+                              console.error(`[Personalized Offers Fetch] HTTP error! status: ${response.status}`);
+                         }
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const offers = await response.json();
+
+                    personalizedOffersListDiv.innerHTML = ''; // Clear loading
+
+                    if (!Array.isArray(offers) || offers.length === 0) {
+                        personalizedOffersListDiv.innerHTML = '<p class="no-promotions-message">No personalized offers available right now.</p>';
+                        return;
+                    }
+
+                    offers.forEach(offer => {
+                        const offerDiv = document.createElement('div');
+                        // Use a slightly different style for personalized offers?
+                        offerDiv.className = 'promotion-item personalized-offer'; // Added 'personalized-offer' class
+                        offerDiv.innerHTML = `
+                            <strong>${offer.code}</strong> 
+                            <p>${offer.description}</p>
+                            <small>(Special personalized offer)</small> 
+                        `;
+                        personalizedOffersListDiv.appendChild(offerDiv);
+                    });
+
+                } catch (error) {
+                     console.error("Failed to fetch personalized offers:", error);
+                     personalizedOffersListDiv.innerHTML = '<p class="error-message">Could not load personalized offers.</p>';
+                }
+            }
+            fetchPersonalizedOffers(); // Fetch personalized offers on page load
+            // --- End Fetch Personalized Offers ---
 
         });
     </script>
